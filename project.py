@@ -118,6 +118,8 @@ def start() -> None:
     # Place all frames in the same location
     for frame in frames.values():
         frame.grid(row=0, column=0, sticky='nsew')
+        window.grid_rowconfigure(0, weight=1)
+        window.grid_columnconfigure(0, weight=1)
 
     # Show the main frame initially
     frames["main"].tkraise()
