@@ -1,5 +1,6 @@
 import os.path
 import sqlite3
+import tkinter as tk
 
 DBFILE: str = "roll_call.db"
 
@@ -73,7 +74,15 @@ def create_database() -> None:
 
 
 def start() -> None:
-    ...
+    window = tk.Tk()
+    createLogin = tk.Label(text="Create account or login")
+    createLogin.pack()
+
+
+    tk.Button(text="Click me!").pack()
+
+
+    window.mainloop()
 
 
 if __name__ == "__main__":
