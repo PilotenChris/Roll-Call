@@ -2,6 +2,7 @@ import os.path
 import sqlite3
 import tkinter as tk
 from tkinter import ttk
+import bcrypt
 
 DBFILE: str = "roll_call.db"
 
@@ -28,7 +29,7 @@ def create_database() -> None:
     # Create the table User in the Database with required fields
     cur.execute("CREATE TABLE User(Id INTEGER NOT NULL UNIQUE," +
                 "Name TEXT NOT NULL, Birth TEXT NOT NULL," +
-                "Email TEXT NOT NULL, UniEmail TEXT," +
+                "Email TEXT NOT NULL UNIQUE, UniEmail TEXT," +
                 "Password TEXT NOT NULL, Account INTEGER NOT NULL," +
                 "PRIMARY KEY(Id AUTOINCREMENT)," +
                 "FOREIGN KEY(Account) REFERENCES Account(AccountId))")
@@ -67,11 +68,36 @@ def create_database() -> None:
                 "FOREIGN KEY(UserId) REFERENCES User(Id)," +
                 "PRIMARY KEY(UserId, Course))")
 
+    cur.execute("CREATE TRIGGER CreateUniEmail AFTER INSERT ON User " + "\n" +
+                "BEGIN " + "\n" +
+                "UPDATE User SET UniEmail = NEW.Id || '@idkUniversity.com' WHERE Id = NEW.Id;" + "\n" +
+                "END;")
+
     # Insert the default data into table Account
     cur.execute("INSERT INTO Account (AccountType) VALUES ('Student')," +
                 "('Teacher'), ('Admin')")
+
     con.commit()
     con.close()
+
+
+def check_login(email: str, password: str) -> bool:
+    # Connect to the database and go through User to find password by email
+    with sqlite3.connect(DBFILE) as db:
+        cur = db.cursor()
+        cur.execute("SELECT Password FROM User WHERE Email = ?", (email,))
+        # If you found the Email, put password in the result, else put None in the result
+        result = cur.fetchone()
+
+        # If the result is None, then the Email was wrong, and return False
+        if result is None:
+            return False
+
+        stored_hash_password = result[0].encode("utf-8")
+        password_encode = password.encode("utf-8")
+
+        # Check and return true if the password is correct
+        return bcrypt.checkpw(password_encode, stored_hash_password)
 
 
 def start() -> None:
@@ -83,8 +109,15 @@ def start() -> None:
     login = ttk.Button(text="Login", style="alt.TButton")
     login.pack(pady=5)
 
-
     window.mainloop()
+
+
+def create_user() -> None:
+    ...
+
+
+def login() -> None:
+    ...
 
 
 if __name__ == "__main__":
