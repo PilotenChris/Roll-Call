@@ -6,7 +6,6 @@ import bcrypt
 
 DBFILE: str = "roll_call.db"
 
-
 def main() -> None:
     if not os.path.isfile(DBFILE):
         create_database()
@@ -103,21 +102,46 @@ def check_login(email: str, password: str) -> bool:
 def start() -> None:
     window = tk.Tk()
     window.geometry("700x400")
-    ttk.Label(text="Create account or login", font=25, padding=(0, 20)).pack()
-    create = ttk.Button(text="Create", style="alt.TButton")
-    create.pack(pady=5)
-    login = ttk.Button(text="Login", style="alt.TButton")
-    login.pack(pady=5)
 
+    # Create frames and store them in a dictionary for easy access
+    frames = {
+        "main": ttk.Frame(window),
+        "create_user": ttk.Frame(window),
+        "login": ttk.Frame(window)
+    }
+
+    # Setup each frame
+    main_frame(frames["main"], frames)
+    create_user(frames["create_user"], frames)
+    login(frames["login"], frames)
+
+    # Place all frames in the same location
+    for frame in frames.values():
+        frame.grid(row=0, column=0, sticky='nsew')
+
+    # Show the main frame initially
+    frames["main"].tkraise()
     window.mainloop()
 
 
-def create_user() -> None:
-    ...
+def main_frame(frame, frames):
+    ttk.Label(frame, text="Create account or login", font=25, padding=(0, 20)).pack()
+    create = ttk.Button(frame, text="Create", style="alt.TButton", command=lambda: frames["create_user"].tkraise())
+    create.pack(pady=5)
+    login = ttk.Button(frame, text="Login", style="alt.TButton", command=lambda: frames["login"].tkraise())
+    login.pack(pady=5)
 
 
-def login() -> None:
-    ...
+def create_user(frame, frames) -> None:
+    ttk.Label(frame, text="Create a New User", font=25).pack(pady=20)
+    # Add more widgets here as needed...
+    ttk.Button(frame, text="Back to Main", command=lambda: frames["main"].tkraise()).pack()
+
+
+def login(frame, frames) -> None:
+    ttk.Label(frame, text="Login User", font=25).pack(pady=20)
+    # Add more widgets here as needed...
+    ttk.Button(frame, text="Back to Main", command=lambda: frames["main"].tkraise()).pack()
 
 
 if __name__ == "__main__":
