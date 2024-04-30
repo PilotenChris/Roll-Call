@@ -126,21 +126,19 @@ def start() -> None:
 
 def main_frame(frame, frames):
     ttk.Label(frame, text="Create account or login", font=25, padding=(0, 20)).pack()
-    create = ttk.Button(frame, text="Create", style="alt.TButton", command=lambda: frames["create_user"].tkraise())
-    create.pack(pady=5)
-    login = ttk.Button(frame, text="Login", style="alt.TButton", command=lambda: frames["login"].tkraise())
-    login.pack(pady=5)
+    createb = ttk.Button(frame, text="Create", style="alt.TButton", command=lambda: frames["create_user"].tkraise())
+    createb.pack(pady=5)
+    loginb = ttk.Button(frame, text="Login", style="alt.TButton", command=lambda: frames["login"].tkraise())
+    loginb.pack(pady=5)
 
 
 def create_user(frame, frames) -> None:
     ttk.Label(frame, text="Create a New User", font=25).pack(pady=20)
-    # Add more widgets here as needed...
     ttk.Button(frame, text="Back to Main", command=lambda: frames["main"].tkraise()).pack()
 
 
 def login(frame, frames) -> None:
     ttk.Label(frame, text="Login User", font=25).pack(pady=20)
-    # Add more widgets here as needed...
     ttk.Button(frame, text="Back to Main", command=lambda: frames["main"].tkraise()).pack()
 
 
