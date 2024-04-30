@@ -95,7 +95,7 @@ def check_login(email: str, password: str) -> bool:
         stored_hash_password = result[0].encode("utf-8")
         password_encode = password.encode("utf-8")
 
-        # Check and return true if the password is correct
+        # Check and return true if the password is correct, else return false
         return bcrypt.checkpw(password_encode, stored_hash_password)
 
 
