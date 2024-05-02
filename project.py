@@ -32,7 +32,7 @@ def create_database() -> None:
 
     # Create the table User in the Database with required fields
     cur.execute("CREATE TABLE User(Id INTEGER NOT NULL UNIQUE," +
-                "Name TEXT NOT NULL, Birth TEXT NOT NULL," +
+                "FirstName TEXT NOT NULL, Surname TEXT NOT NULL, Birth TEXT NOT NULL," +
                 "Email TEXT NOT NULL UNIQUE, UniEmail TEXT," +
                 "Password TEXT NOT NULL, Account INTEGER NOT NULL," +
                 "PRIMARY KEY(Id AUTOINCREMENT)," +
@@ -77,6 +77,11 @@ def create_database() -> None:
                 "UPDATE User SET UniEmail = NEW.Id || '@idkUniversity.com' WHERE Id = NEW.Id;" + "\n" +
                 "END;")
 
+    cur.execute("CREATE TRIGGER AssignUser AFTER INSERT ON User " + "\n" +
+                "BEGIN " + "\n" +
+                "UPDATE User SET Account = 1 WHERE Id = NEW.Id;" + "\n" +
+                "END;")
+
     # Insert the default data into table Account
     cur.execute("INSERT INTO Account (AccountType) VALUES ('Student')," +
                 "('Teacher'), ('Admin')")
@@ -110,6 +115,13 @@ def validate_date(date_b: str) -> bool:
 
 def validate_email(email_u: str) -> bool:
     return checkers.is_email(email_u)
+
+
+def create_new_user(firstname: str, surname: str, birth: str, email: str, password: str) -> None:
+    with sqlite3.connect(DBFILE) as db:
+        cur = db.cursor()
+        cur.execute("INSERT INTO User VALUES (?, ?, ?, ?, null, ?, null)", (firstname, surname, birth,
+                                                                            email, password))
 
 
 def start() -> None:
