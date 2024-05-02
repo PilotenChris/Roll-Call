@@ -1,10 +1,15 @@
 import os.path
+import re
 import sqlite3
 import tkinter as tk
 from tkinter import ttk
 import bcrypt
+from validator_collection import checkers
 
 DBFILE: str = "roll_call.db"
+
+custom_label_font: tuple = ("Helvetica", 15)
+
 
 def main() -> None:
     if not os.path.isfile(DBFILE):
@@ -99,6 +104,14 @@ def check_login(email: str, password: str) -> bool:
         return bcrypt.checkpw(password_encode, stored_hash_password)
 
 
+def validate_date(date_b: str) -> bool:
+    return checkers.is_date(date_b)
+
+
+def validate_email(email_u: str) -> bool:
+    return checkers.is_email(email_u)
+
+
 def start() -> None:
     window = tk.Tk()
     window.geometry("700x400")
@@ -127,7 +140,7 @@ def start() -> None:
 
 
 def main_frame(frame, frames):
-    ttk.Label(frame, text="Create account or login", font=25, padding=(0, 20)).pack()
+    ttk.Label(frame, text="Create account or login", font=custom_label_font, padding=(0, 20)).pack()
     createb = ttk.Button(frame, text="Create", style="alt.TButton", command=lambda: frames["create_user"].tkraise())
     createb.pack(pady=5)
     loginb = ttk.Button(frame, text="Login", style="alt.TButton", command=lambda: frames["login"].tkraise())
@@ -135,12 +148,50 @@ def main_frame(frame, frames):
 
 
 def create_user(frame, frames) -> None:
-    ttk.Label(frame, text="Create a New User", font=25).pack(pady=20)
-    ttk.Button(frame, text="Back to Main", command=lambda: frames["main"].tkraise()).pack()
+    ttk.Label(frame, text="Create a New User", font=custom_label_font).pack(pady=(10, 10))
+    ttk.Label(frame, text="First name").pack()
+    first_name = ttk.Entry(frame)
+    first_name.pack(pady=(0, 5))
+    ttk.Label(frame, text="Surname").pack()
+    surname = ttk.Entry(frame)
+    surname.pack(pady=(0, 5))
+    ttk.Label(frame, text="Birthdate (YYYY-MM-DD)").pack()
+    birthdate = ttk.Entry(frame)
+    birthdate.pack(pady=(0, 5))
+    ttk.Label(frame, text="Email").pack()
+    email = ttk.Entry(frame)
+    email.pack(pady=(0, 5))
+    ttk.Label(frame, text="Password").pack()
+    password1 = ttk.Entry(frame)
+    password2 = ttk.Entry(frame)
+    password1.pack(pady=(0, 5))
+    password2.pack(pady=(0, 5))
+    ttk.Button(frame, text="Create user", command=lambda: validate_create(first_name.get(), surname.get(),
+                                                                          birthdate.get(), email.get(), password1.get(),
+                                                                          password2.get())).pack()
+
+
+    def validate_create(f_name: str, s_name: str, date_b: str, email_u: str, pass1: str, pass2: str) -> None:
+        if (f_name.isalpha() and f_name != "" and s_name.isalpha() and s_name != "" and validate_date(date_b) and
+                validate_email(email_u) and pass1 != "" and pass2 != ""):
+            hash_pass1: str = ""
+            hash_pass2: str = ""
+            if validate_password(hash_pass1, hash_pass2):
+                first_name.delete(0, "end")
+                surname.delete(0, "end")
+                birthdate.delete(0, "end")
+                email.delete(0, "end")
+                password1.delete(0, "end")
+                password2.delete(0, "end")
+                frames["login"].tkraise()
+            else:
+                ttk.Label(frame, text="Wrong password").pack()
+        else:
+            print("No")
 
 
 def login(frame, frames) -> None:
-    ttk.Label(frame, text="Login User", font=25).pack(pady=20)
+    ttk.Label(frame, text="Login User", font=custom_label_font).pack(pady=20)
     ttk.Button(frame, text="Back to Main", command=lambda: frames["main"].tkraise()).pack()
 
 
