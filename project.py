@@ -201,9 +201,9 @@ def create_user(frame, frames) -> None:
                 user_message.config(text="Wrong password")
         elif not f_name.isalpha() or f_name == "" or not s_name.isalpha() or s_name == "":
             user_message.config(text="Missing name")
-        elif validate_date(date_b) == False:
+        elif not validate_date(date_b):
             user_message.config(text="Incorrect date/format")
-        elif validate_email(email_u) == False:
+        elif not validate_email(email_u):
             user_message.config(text="Invalid email")
         else:
             user_message.config(text="Please enter required information")
