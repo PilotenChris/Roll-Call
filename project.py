@@ -210,8 +210,28 @@ def create_user(frame, frames) -> None:
 
 
 def login(frame, frames) -> None:
-    ttk.Label(frame, text="Login User", font=custom_label_font).pack(pady=20)
-    ttk.Button(frame, text="Back to Main", command=lambda: frames["main"].tkraise()).pack()
+    ttk.Label(frame, text="User Login", font=custom_label_font).pack(pady=(10, 10))
+    ttk.Label(frame, text="Email").pack()
+    email = ttk.Entry(frame)
+    email.pack(pady=(0, 5))
+    ttk.Label(frame, text="Password").pack()
+    password = ttk.Entry(frame)
+    password.pack(pady=(0, 5))
+    ttk.Button(frame, text="Login", command=lambda: validate_login(email.get(), password.get())).pack()
+    user_message = ttk.Label(frame, text="")
+    user_message.pack()
+
+    def validate_login(email_u: str, passw: str) -> None:
+        if validate_email(email_u) and passw != "":
+            if check_login(email_u, passw):
+                email.delete(0, "end")
+                password.delete(0, "end")
+            else:
+                user_message.config(text="Invalid email or password")
+        elif not validate_email(email_u):
+            user_message.config(text="Invalid email or password")
+        else:
+            user_message.config(text="Please enter required information")
 
 
 if __name__ == "__main__":
