@@ -135,13 +135,15 @@ def start() -> None:
     frames = {
         "main": ttk.Frame(window),
         "create_user": ttk.Frame(window),
-        "login": ttk.Frame(window)
+        "login": ttk.Frame(window),
+        "portal": ttk.Frame(window)
     }
 
     # Setup each frame
     main_frame(frames["main"], frames)
     create_user(frames["create_user"], frames)
     login(frames["login"], frames)
+    user_portal(frames["portal"], frames)
 
     # Place all frames in the same location
     for frame in frames.values():
@@ -177,8 +179,8 @@ def create_user(frame, frames) -> None:
     email = ttk.Entry(frame)
     email.pack(pady=(0, 5))
     ttk.Label(frame, text="Password").pack()
-    password1 = ttk.Entry(frame)
-    password2 = ttk.Entry(frame)
+    password1 = ttk.Entry(frame, show="*")
+    password2 = ttk.Entry(frame, show="*")
     password1.pack(pady=(0, 5))
     password2.pack(pady=(0, 5))
     ttk.Button(frame, text="Create user", command=lambda: validate_create(first_name.get(), surname.get(),
@@ -221,7 +223,7 @@ def login(frame, frames) -> None:
     email = ttk.Entry(frame)
     email.pack(pady=(0, 5))
     ttk.Label(frame, text="Password").pack()
-    password = ttk.Entry(frame)
+    password = ttk.Entry(frame, show="*")
     password.pack(pady=(0, 5))
     ttk.Button(frame, text="Login", command=lambda: validate_login(email.get(), password.get())).pack()
     user_message = ttk.Label(frame, text="")
@@ -232,12 +234,17 @@ def login(frame, frames) -> None:
             if check_login(email_u, passw.encode("utf-8")):
                 email.delete(0, "end")
                 password.delete(0, "end")
+                frames["portal"].tkraise()
             else:
                 user_message.config(text="Invalid email or password")
         elif not validate_email(email_u):
             user_message.config(text="Invalid email or password")
         else:
             user_message.config(text="Please enter required information")
+
+
+def user_portal(frame, frames) -> None:
+    ...
 
 
 if __name__ == "__main__":
