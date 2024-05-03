@@ -181,7 +181,8 @@ def create_user(frame, frames) -> None:
     ttk.Button(frame, text="Create user", command=lambda: validate_create(first_name.get(), surname.get(),
                                                                           birthdate.get(), email.get(), password1.get(),
                                                                           password2.get())).pack()
-
+    user_message = ttk.Label(frame, text="")
+    user_message.pack()
 
     def validate_create(f_name: str, s_name: str, date_b: str, email_u: str, pass1: str, pass2: str) -> None:
         if (f_name.isalpha() and f_name != "" and s_name.isalpha() and s_name != "" and validate_date(date_b) and
@@ -197,9 +198,15 @@ def create_user(frame, frames) -> None:
                 password2.delete(0, "end")
                 frames["login"].tkraise()
             else:
-                ttk.Label(frame, text="Wrong password").pack()
+                user_message.config(text="Wrong password")
+        elif not f_name.isalpha() or f_name == "" or not s_name.isalpha() or s_name == "":
+            user_message.config(text="Missing name")
+        elif validate_date(date_b) == False:
+            user_message.config(text="Incorrect date/format")
+        elif validate_email(email_u) == False:
+            user_message.config(text="Invalid email")
         else:
-            print("No")
+            user_message.config(text="Please enter required information")
 
 
 def login(frame, frames) -> None:
