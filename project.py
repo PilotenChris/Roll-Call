@@ -31,10 +31,10 @@ def create_database() -> None:
                 "PRIMARY KEY(AccountId AUTOINCREMENT))")
 
     # Create the table User in the Database with required fields
-    cur.execute("CREATE TABLE User(Id INTEGER NOT NULL UNIQUE," +
+    cur.execute("CREATE TABLE User(Id INTEGER UNIQUE," +
                 "FirstName TEXT NOT NULL, Surname TEXT NOT NULL, Birth TEXT NOT NULL," +
                 "Email TEXT NOT NULL UNIQUE, UniEmail TEXT," +
-                "Password TEXT NOT NULL, Account INTEGER NOT NULL," +
+                "Password TEXT NOT NULL, Account INTEGER," +
                 "PRIMARY KEY(Id AUTOINCREMENT)," +
                 "FOREIGN KEY(Account) REFERENCES Account(AccountId))")
 
@@ -90,7 +90,7 @@ def create_database() -> None:
     con.close()
 
 
-def check_login(email: str, password: str) -> bool:
+def check_login(email: str, password: bytes) -> bool:
     # Connect to the database and go through User to find password by email
     with sqlite3.connect(DBFILE) as db:
         cur = db.cursor()
@@ -102,11 +102,10 @@ def check_login(email: str, password: str) -> bool:
         if result is None:
             return False
 
-        stored_hash_password = result[0].encode("utf-8")
-        password_encode = password.encode("utf-8")
+        stored_hash_password = result[0]
 
         # Check and return true if the password is correct, else return false
-        return bcrypt.checkpw(password_encode, stored_hash_password)
+        return bcrypt.checkpw(password, stored_hash_password)
 
 
 def validate_date(date_b: str) -> bool:
@@ -117,11 +116,15 @@ def validate_email(email_u: str) -> bool:
     return checkers.is_email(email_u)
 
 
-def create_new_user(firstname: str, surname: str, birth: str, email: str, password: str) -> None:
+def create_new_user(firstname: str, surname: str, birth: str, email: str, password: bytes) -> None:
     with sqlite3.connect(DBFILE) as db:
         cur = db.cursor()
-        cur.execute("INSERT INTO User VALUES (?, ?, ?, ?, null, ?, null)", (firstname, surname, birth,
+        cur.execute("INSERT INTO User VALUES (null, ?, ?, ?, ?, null, ?, null)", (firstname, surname, birth,
                                                                             email, password))
+
+
+def validate_password(hash_pass1: bytes, hash_pass2: bytes) -> bool:
+    return bcrypt.checkpw(hash_pass1, hash_pass2)
 
 
 def start() -> None:
@@ -187,9 +190,10 @@ def create_user(frame, frames) -> None:
     def validate_create(f_name: str, s_name: str, date_b: str, email_u: str, pass1: str, pass2: str) -> None:
         if (f_name.isalpha() and f_name != "" and s_name.isalpha() and s_name != "" and validate_date(date_b) and
                 validate_email(email_u) and pass1 != "" and pass2 != ""):
-            hash_pass1: str = ""
-            hash_pass2: str = ""
-            if validate_password(hash_pass1, hash_pass2):
+            salt = bcrypt.gensalt()
+            hash_pass: bytes = bcrypt.hashpw(pass2.encode("utf-8"), salt)
+            if validate_password(pass1.encode("utf-8"), hash_pass):
+                create_new_user(f_name, s_name, date_b, email_u, hash_pass)
                 first_name.delete(0, "end")
                 surname.delete(0, "end")
                 birthdate.delete(0, "end")
@@ -205,6 +209,8 @@ def create_user(frame, frames) -> None:
             user_message.config(text="Incorrect date/format")
         elif not validate_email(email_u):
             user_message.config(text="Invalid email")
+        elif pass1 == "" or pass2 == "":
+            user_message.config(text="Missing password")
         else:
             user_message.config(text="Please enter required information")
 
@@ -223,7 +229,7 @@ def login(frame, frames) -> None:
 
     def validate_login(email_u: str, passw: str) -> None:
         if validate_email(email_u) and passw != "":
-            if check_login(email_u, passw):
+            if check_login(email_u, passw.encode("utf-8")):
                 email.delete(0, "end")
                 password.delete(0, "end")
             else:
