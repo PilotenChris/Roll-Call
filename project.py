@@ -48,7 +48,7 @@ def create_database() -> None:
                 "DegreeId INTEGER NOT NULL," +
                 "FOREIGN KEY(UserId) REFERENCES User(Id)," +
                 "FOREIGN KEY(DegreeId) REFERENCES Degrees(DegreeId)," +
-                "PRIMARY KEY(UserId, DegreeId))")
+                "PRIMARY KEY(UserId))")
 
     # Create the table Course in the Database with required fields
     cur.execute("CREATE TABLE Course(CourseId INTEGER NOT NULL UNIQUE," +
