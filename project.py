@@ -112,18 +112,23 @@ def check_login(email: str, password: bytes) -> bool:
 
         stored_hash_password = result[0]
         stored_id = result[1]
-        """
-        cur.execute("SELECT FirstName, Surname, Birth, Email, UniEmail, Account")
+        cur.execute("SELECT FirstName, Surname, Birth, Email, UniEmail, Account FROM User WHERE Id = ?", (stored_id,))
         person_result = cur.fetchone()
         global user
         
         if person_result[5] == 1:
-            user = Student(stored_id, ..., ..., ..., ..., ..., "", [], [])
+            print("1")
+            user = Student(stored_id, person_result[0], person_result[1], person_result[2], person_result[3],
+                           person_result[4], "", [], [])
+            print(user)
         elif person_result[5] == 2:
-            user = Teacher(stored_id, ..., ..., ..., ..., ..., [])
+            print("2")
+            user = Teacher(stored_id, person_result[0], person_result[1], person_result[2], person_result[3],
+                           person_result[4], [])
         elif person_result[5] == 3:
-            user = Admin(stored_id, ..., ..., ..., ..., ...)
-            """
+            print("3")
+            user = Admin(stored_id, person_result[0], person_result[1], person_result[2], person_result[3],
+                         person_result[4])
 
         # Check and return true if the password is correct, else return false
         return bcrypt.checkpw(password, stored_hash_password)
@@ -204,9 +209,11 @@ def create_user(frame, frames) -> None:
     password2 = ttk.Entry(frame, show="*")
     password1.pack(pady=(0, 5))
     password2.pack(pady=(0, 5))
-    ttk.Button(frame, text="Create user", command=lambda: validate_create(first_name.get(), surname.get(),
-                                                                          birthdate.get(), email.get(), password1.get(),
-                                                                          password2.get())).pack()
+    ttk.Button(frame, text="Create user", command=lambda: validate_create(first_name.get().strip(),
+                                                                          surname.get().strip(),
+                                                                          birthdate.get().strip(), email.get().strip(),
+                                                                          password1.get().strip(),
+                                                                          password2.get().strip())).pack()
     ttk.Button(frame, text="Back", command=lambda: frames["main"].tkraise()).pack(pady=5)
     user_message = ttk.Label(frame, text="")
     user_message.pack()
@@ -247,7 +254,7 @@ def login(frame, frames) -> None:
     ttk.Label(frame, text="Password").pack()
     password = ttk.Entry(frame, show="*")
     password.pack(pady=(0, 5))
-    ttk.Button(frame, text="Login", command=lambda: validate_login(email.get(), password.get())).pack()
+    ttk.Button(frame, text="Login", command=lambda: validate_login(email.get().strip(), password.get().strip())).pack()
     ttk.Button(frame, text="Back", command=lambda: frames["main"].tkraise()).pack(pady=5)
     user_message = ttk.Label(frame, text="")
     user_message.pack()
