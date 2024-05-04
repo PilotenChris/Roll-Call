@@ -1,4 +1,5 @@
-import Course
+from Course import Course
+
 
 class Grade:
     def __init__(self, course: Course, grades: list[dict]):
@@ -7,7 +8,6 @@ class Grade:
 
     def __str__(self) -> str:
         return f"Course: {self._course}, Grades: {self._grades}"
-
 
     @property
     def course(self) -> Course:

@@ -1,4 +1,5 @@
-import Person
+from Person import Person
+
 
 class Admin(Person):
     def __init__(self, id: int, name: str, surname: str, birthdate: str, email: str, uniEmail: str):

@@ -5,10 +5,18 @@ import tkinter as tk
 from tkinter import ttk
 import bcrypt
 from validator_collection import checkers
+from Person import Person
+from Student import Student
+from Teacher import Teacher
+from Admin import Admin
+from Course import Course
+from Grade import Grade
 
 DBFILE: str = "roll_call.db"
 
 custom_label_font: tuple = ("Helvetica", 15)
+
+user: Person
 
 
 def main() -> None:
@@ -94,7 +102,7 @@ def check_login(email: str, password: bytes) -> bool:
     # Connect to the database and go through User to find password by email
     with sqlite3.connect(DBFILE) as db:
         cur = db.cursor()
-        cur.execute("SELECT Password FROM User WHERE Email = ?", (email,))
+        cur.execute("SELECT Password, id FROM User WHERE Email = ?", (email,))
         # If you found the Email, put password in the result, else put None in the result
         result = cur.fetchone()
 
@@ -103,6 +111,18 @@ def check_login(email: str, password: bytes) -> bool:
             return False
 
         stored_hash_password = result[0]
+        stored_id = result[1]
+        cur.execute("SELECT FirstName, Surname, Birth, Email, UniEmail, Account")
+        person_result = cur.fetchone()
+        global user
+        """
+        if person_result[5] == 1:
+            user = Student(stored_id, ..., ..., ..., ..., ..., "", [], [])
+        elif person_result[5] == 2:
+            user = Teacher(stored_id, ..., ..., ..., ..., ..., [])
+        elif person_result[5] == 3:
+            user = Admin(stored_id, ..., ..., ..., ..., ...)
+            """
 
         # Check and return true if the password is correct, else return false
         return bcrypt.checkpw(password, stored_hash_password)

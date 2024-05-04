@@ -1,9 +1,11 @@
-import Person
-import Course
-import Grade
+from Person import Person
+from Course import Course
+from Grade import Grade
+
 
 class Student(Person):
-    def __init__(self, id: int, name: str, surname: str, birthdate: str, email: str, uniEmail: str, degree: str, courses: list[Course], grades: list[Grade]):
+    def __init__(self, id: int, name: str, surname: str, birthdate: str, email: str, uniEmail: str, degree: str,
+                 courses: list[Course], grades: list[Grade]):
         super().__init__(id, name, surname, birthdate, email, uniEmail)
         self.degree: str = degree
         self.courses: list[Course] = courses
@@ -12,9 +14,8 @@ class Student(Person):
     def __str__(self) -> str:
         course: list[str] = []
         for i in self._courses:
-            course.append(f"{i.id()} {i.name()}, ")
+            course.append(f"{i.id} {i.name}, ")
         return f"{super().__str__()}, Degree: {self._degree}, Courses: {''.join(course)}, Grades: {self._grades}"
-
 
     @property
     def degree(self) -> str:
