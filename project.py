@@ -207,6 +207,7 @@ def create_user(frame, frames) -> None:
     ttk.Button(frame, text="Create user", command=lambda: validate_create(first_name.get(), surname.get(),
                                                                           birthdate.get(), email.get(), password1.get(),
                                                                           password2.get())).pack()
+    ttk.Button(frame, text="Back", command=lambda: frames["main"].tkraise()).pack(pady=5)
     user_message = ttk.Label(frame, text="")
     user_message.pack()
 
@@ -247,6 +248,7 @@ def login(frame, frames) -> None:
     password = ttk.Entry(frame, show="*")
     password.pack(pady=(0, 5))
     ttk.Button(frame, text="Login", command=lambda: validate_login(email.get(), password.get())).pack()
+    ttk.Button(frame, text="Back", command=lambda: frames["main"].tkraise()).pack(pady=5)
     user_message = ttk.Label(frame, text="")
     user_message.pack()
 
@@ -265,7 +267,16 @@ def login(frame, frames) -> None:
 
 
 def user_portal(frame, frames) -> None:
-    ...
+    sidebar = tk.Frame(frames["portal"], bg="#C9C9C9")
+    sidebar.pack(ipadx=20, fill=tk.Y, side=tk.LEFT)
+    account = tk.Button(sidebar, text="Account", bg="#C9C9C9", font=custom_label_font)
+    account.pack(pady=(15, 0))
+    courses = tk.Button(sidebar, text="Courses", bg="#C9C9C9", font=custom_label_font)
+    courses.pack(pady=(15, 0))
+    grades = tk.Button(sidebar, text="Grades", bg="#C9C9C9", font=custom_label_font)
+    grades.pack(pady=(15, 0))
+    sign_out = tk.Button(sidebar, text="Sign Out", bg="#C9C9C9", font=custom_label_font)
+    sign_out.pack(pady=15, side=tk.BOTTOM)
 
 
 if __name__ == "__main__":
