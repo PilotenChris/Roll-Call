@@ -112,10 +112,11 @@ def check_login(email: str, password: bytes) -> bool:
 
         stored_hash_password = result[0]
         stored_id = result[1]
+        """
         cur.execute("SELECT FirstName, Surname, Birth, Email, UniEmail, Account")
         person_result = cur.fetchone()
         global user
-        """
+        
         if person_result[5] == 1:
             user = Student(stored_id, ..., ..., ..., ..., ..., "", [], [])
         elif person_result[5] == 2:
