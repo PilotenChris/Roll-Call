@@ -1,5 +1,5 @@
 from Teacher import Teacher
-from Student import Student
+import Student
 
 
 class Course:
