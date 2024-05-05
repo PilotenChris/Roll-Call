@@ -16,7 +16,8 @@ from Grade import Grade
 DBFILE: str = "roll_call.db"
 
 # Font style for labels in application
-custom_label_font: tuple = ("Helvetica", 15)
+custom_font1: tuple = ("Helvetica", 15)
+custom_font2: tuple = ("Helvetica", 13)
 
 # Current logged-in user, instance of type Person (Student, Teacher, Admin)
 user: Person
@@ -150,9 +151,11 @@ def check_login(email: str, password: bytes) -> bool:
 def validate_date(date_b: str) -> bool:
     return checkers.is_date(date_b)
 
+
 # Check if provided str is valid email format
 def validate_email(email_u: str) -> bool:
     return checkers.is_email(email_u)
+
 
 # Compare 2 hashed passwords to check if they are the same
 def validate_password(hash_pass1: bytes, hash_pass2: bytes) -> bool:
@@ -164,7 +167,7 @@ def create_new_user(firstname: str, surname: str, birth: str, email: str, passwo
     with sqlite3.connect(DBFILE) as db:
         cur = db.cursor()
         cur.execute("INSERT INTO User VALUES (null, ?, ?, ?, ?, null, ?, null)", (firstname, surname, birth,
-                                                                            email, password))
+                                                                                  email, password))
 
 
 # Set up initial GUI components and allow user to login or register
@@ -177,14 +180,13 @@ def start() -> None:
         "main": ttk.Frame(window),
         "create_user": ttk.Frame(window),
         "login": ttk.Frame(window),
-        "portal": ttk.Frame(window)
+        "portal": ttk.Frame(window),
     }
 
     # Setup each frame
     main_frame(frames["main"], frames)
     create_user(frames["create_user"], frames)
     login(frames["login"], frames)
-    user_portal(frames["portal"], frames)
 
     # Place all frames in the same location
     for frame in frames.values():
@@ -199,7 +201,7 @@ def start() -> None:
 
 # Configure main frame of application, providing options for user account creation or login
 def main_frame(frame, frames):
-    ttk.Label(frame, text="Create account or login", font=custom_label_font, padding=(0, 20)).pack()
+    ttk.Label(frame, text="Create account or login", font=custom_font1, padding=(0, 20)).pack()
     createb = ttk.Button(frame, text="Create", style="alt.TButton", command=lambda: frames["create_user"].tkraise())
     createb.pack(pady=5)
     loginb = ttk.Button(frame, text="Login", style="alt.TButton", command=lambda: frames["login"].tkraise())
@@ -208,7 +210,7 @@ def main_frame(frame, frames):
 
 # Sets up GUI for creating new user account, including entry fields for personal and login information
 def create_user(frame, frames) -> None:
-    ttk.Label(frame, text="Create a New User", font=custom_label_font).pack(pady=(10, 10))
+    ttk.Label(frame, text="Create a New User", font=custom_font1).pack(pady=(10, 10))
 
     ttk.Label(frame, text="First name").pack()
     first_name = ttk.Entry(frame)
@@ -278,7 +280,7 @@ def create_user(frame, frames) -> None:
 
 # Handle user login with email and password, including validation and session handling
 def login(frame, frames) -> None:
-    ttk.Label(frame, text="User Login", font=custom_label_font).pack(pady=(10, 10))
+    ttk.Label(frame, text="User Login", font=custom_font1).pack(pady=(10, 10))
 
     ttk.Label(frame, text="Email").pack()
     email = ttk.Entry(frame)
@@ -304,6 +306,8 @@ def login(frame, frames) -> None:
                 # Clear entry fields on successful login
                 email.delete(0, "end")
                 password.delete(0, "end")
+                # Setup portal frame
+                user_portal(frames["portal"], frames)
                 # Switch to portal frame
                 frames["portal"].tkraise()
             else:
@@ -317,14 +321,56 @@ def login(frame, frames) -> None:
 def user_portal(frame, frames) -> None:
     sidebar = tk.Frame(frames["portal"], bg="#C9C9C9")
     sidebar.pack(ipadx=20, fill=tk.Y, side=tk.LEFT)
-    account = tk.Button(sidebar, text="Account", bg="#C9C9C9", font=custom_label_font)
+
+    content_frame = tk.Frame(frames["portal"])
+    content_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    account = tk.Button(sidebar, text="Account", bg="#C9C9C9", font=custom_font1,
+                        command=lambda: update_content("account"))
     account.pack(pady=(15, 0))
-    courses = tk.Button(sidebar, text="Courses", bg="#C9C9C9", font=custom_label_font)
+
+    courses = tk.Button(sidebar, text="Courses", bg="#C9C9C9", font=custom_font1,
+                        command=lambda: update_content("courses"))
     courses.pack(pady=(15, 0))
-    grades = tk.Button(sidebar, text="Grades", bg="#C9C9C9", font=custom_label_font)
+
+    grades = tk.Button(sidebar, text="Grades", bg="#C9C9C9", font=custom_font1,
+                       command=lambda: update_content("grades"))
     grades.pack(pady=(15, 0))
-    sign_out = tk.Button(sidebar, text="Sign Out", bg="#C9C9C9", font=custom_label_font)
+
+    sign_out = tk.Button(sidebar, text="Sign Out", bg="#C9C9C9", font=custom_font1)
     sign_out.pack(pady=15, side=tk.BOTTOM)
+
+    def update_content(context) -> None:
+        for widget in content_frame.winfo_children():
+            widget.destroy()
+
+        if context == "account":
+            frame0 = tk.Frame(content_frame, bg="red")
+            frame0.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
+            frame1 = tk.Frame(frame0)
+            frame1.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+            frame2 = tk.Frame(frame0)
+            frame2.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+            frame3 = tk.Frame(content_frame, bg="red")
+            frame3.pack(side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
+
+            tk.Label(frame1, text=f"ID: {user.id}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame1, text=f"Name: {user.name} {user.surname}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame1, text=f"Birthdate: {user.birthdate}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame2, text=f"Email: {user.email}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame2, text=f"University Email: {user.uniEmail}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame2, text=f"Degree:", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame3, text="Settings:", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+
+        elif context == "courses":
+            tk.Label(content_frame, text="Courses enrolled:").pack(pady=(15, 0))
+            tk.Label(content_frame, text="Calculus, Physics, Literature").pack(pady=(15, 0))
+
+        elif context == "grades":
+            tk.Label(content_frame, text="Recent Grades:").pack(pady=(15, 0))
+            tk.Label(content_frame, text="Calculus: A, Physics: B, Literature: A").pack(pady=(15, 0))
+
+    update_content("account")
 
 
 if __name__ == "__main__":
