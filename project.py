@@ -12,14 +12,18 @@ from Admin import Admin
 from Course import Course
 from Grade import Grade
 
+# Constant for database file path
 DBFILE: str = "roll_call.db"
 
+# Font style for labels in application
 custom_label_font: tuple = ("Helvetica", 15)
 
+# Current logged-in user, instance of type Person (Student, Teacher, Admin)
 user: Person
 
 
 def main() -> None:
+    # Check if database file exists, if not create new database
     if not os.path.isfile(DBFILE):
         create_database()
 
@@ -80,11 +84,13 @@ def create_database() -> None:
                 "FOREIGN KEY(UserId) REFERENCES User(Id)," +
                 "PRIMARY KEY(UserId, Course))")
 
+    # Triggers to automatically set the UniEmail and Account field upon new user insertion
     cur.execute("CREATE TRIGGER CreateUniEmail AFTER INSERT ON User " + "\n" +
                 "BEGIN " + "\n" +
                 "UPDATE User SET UniEmail = NEW.Id || '@idkUniversity.com' WHERE Id = NEW.Id;" + "\n" +
                 "END;")
 
+    # Trigger to automatically assign the default account type to new users
     cur.execute("CREATE TRIGGER AssignUser AFTER INSERT ON User " + "\n" +
                 "BEGIN " + "\n" +
                 "UPDATE User SET Account = 1 WHERE Id = NEW.Id;" + "\n" +
@@ -94,10 +100,12 @@ def create_database() -> None:
     cur.execute("INSERT INTO Account (AccountType) VALUES ('Student')," +
                 "('Teacher'), ('Admin')")
 
+    # Commit changes and close the database connection
     con.commit()
     con.close()
 
 
+# Checks the login credentials, retrieves user details from the database and initializes the global user object based on the role (Student, Teacher, Admin)
 def check_login(email: str, password: bytes) -> bool:
     # Connect to the database and go through User to find password by email
     with sqlite3.connect(DBFILE) as db:
@@ -110,12 +118,16 @@ def check_login(email: str, password: bytes) -> bool:
         if result is None:
             return False
 
+        # Extract stored password and user ID from the result
         stored_hash_password = result[0]
         stored_id = result[1]
+
+        # Retrieve additional user details based on the user ID
         cur.execute("SELECT FirstName, Surname, Birth, Email, UniEmail, Account FROM User WHERE Id = ?", (stored_id,))
         person_result = cur.fetchone()
         global user
-        
+
+        # Check the user's account type and initialize the corresponding object
         if person_result[5] == 1:
             print("1")
             user = Student(stored_id, person_result[0], person_result[1], person_result[2], person_result[3],
@@ -134,14 +146,20 @@ def check_login(email: str, password: bytes) -> bool:
         return bcrypt.checkpw(password, stored_hash_password)
 
 
+# Check if provided str is valid date format
 def validate_date(date_b: str) -> bool:
     return checkers.is_date(date_b)
 
-
+# Check if provided str is valid email format
 def validate_email(email_u: str) -> bool:
     return checkers.is_email(email_u)
 
+# Compare 2 hashed passwords to check if they are the same
+def validate_password(hash_pass1: bytes, hash_pass2: bytes) -> bool:
+    return bcrypt.checkpw(hash_pass1, hash_pass2)
 
+
+# Insert new user into 'User' database table with given personal and authentication details
 def create_new_user(firstname: str, surname: str, birth: str, email: str, password: bytes) -> None:
     with sqlite3.connect(DBFILE) as db:
         cur = db.cursor()
@@ -149,10 +167,7 @@ def create_new_user(firstname: str, surname: str, birth: str, email: str, passwo
                                                                             email, password))
 
 
-def validate_password(hash_pass1: bytes, hash_pass2: bytes) -> bool:
-    return bcrypt.checkpw(hash_pass1, hash_pass2)
-
-
+# Set up initial GUI components and allow user to login or register
 def start() -> None:
     window = tk.Tk()
     window.geometry("700x400")
@@ -182,6 +197,7 @@ def start() -> None:
     window.mainloop()
 
 
+# Configure main frame of application, providing options for user account creation or login
 def main_frame(frame, frames):
     ttk.Label(frame, text="Create account or login", font=custom_label_font, padding=(0, 20)).pack()
     createb = ttk.Button(frame, text="Create", style="alt.TButton", command=lambda: frames["create_user"].tkraise())
@@ -190,34 +206,46 @@ def main_frame(frame, frames):
     loginb.pack(pady=5)
 
 
+# Sets up GUI for creating new user account, including entry fields for personal and login information
 def create_user(frame, frames) -> None:
     ttk.Label(frame, text="Create a New User", font=custom_label_font).pack(pady=(10, 10))
+
     ttk.Label(frame, text="First name").pack()
     first_name = ttk.Entry(frame)
     first_name.pack(pady=(0, 5))
+
     ttk.Label(frame, text="Surname").pack()
     surname = ttk.Entry(frame)
     surname.pack(pady=(0, 5))
+
     ttk.Label(frame, text="Birthdate (YYYY-MM-DD)").pack()
     birthdate = ttk.Entry(frame)
     birthdate.pack(pady=(0, 5))
+
     ttk.Label(frame, text="Email").pack()
     email = ttk.Entry(frame)
     email.pack(pady=(0, 5))
+
     ttk.Label(frame, text="Password").pack()
     password1 = ttk.Entry(frame, show="*")
     password2 = ttk.Entry(frame, show="*")
     password1.pack(pady=(0, 5))
     password2.pack(pady=(0, 5))
+
+    # Button to submit entered information, with validation checks
     ttk.Button(frame, text="Create user", command=lambda: validate_create(first_name.get().strip(),
                                                                           surname.get().strip(),
                                                                           birthdate.get().strip(), email.get().strip(),
                                                                           password1.get().strip(),
                                                                           password2.get().strip())).pack()
+    # Button to return to main menu
     ttk.Button(frame, text="Back", command=lambda: frames["main"].tkraise()).pack(pady=5)
+
+    # Message label for user feedback on actions
     user_message = ttk.Label(frame, text="")
     user_message.pack()
 
+    # Validate data entered by user when creating new account
     def validate_create(f_name: str, s_name: str, date_b: str, email_u: str, pass1: str, pass2: str) -> None:
         if (f_name.isalpha() and f_name != "" and s_name.isalpha() and s_name != "" and validate_date(date_b) and
                 validate_email(email_u) and pass1 != "" and pass2 != ""):
@@ -225,12 +253,14 @@ def create_user(frame, frames) -> None:
             hash_pass: bytes = bcrypt.hashpw(pass2.encode("utf-8"), salt)
             if validate_password(pass1.encode("utf-8"), hash_pass):
                 create_new_user(f_name, s_name, date_b, email_u, hash_pass)
+                # Clear fields after successful account creation
                 first_name.delete(0, "end")
                 surname.delete(0, "end")
                 birthdate.delete(0, "end")
                 email.delete(0, "end")
                 password1.delete(0, "end")
                 password2.delete(0, "end")
+                # Switch to login frame
                 frames["login"].tkraise()
             else:
                 user_message.config(text="Wrong password")
@@ -246,29 +276,40 @@ def create_user(frame, frames) -> None:
             user_message.config(text="Please enter required information")
 
 
+# Handle user login with email and password, including validation and session handling
 def login(frame, frames) -> None:
     ttk.Label(frame, text="User Login", font=custom_label_font).pack(pady=(10, 10))
+
     ttk.Label(frame, text="Email").pack()
     email = ttk.Entry(frame)
     email.pack(pady=(0, 5))
+
     ttk.Label(frame, text="Password").pack()
     password = ttk.Entry(frame, show="*")
     password.pack(pady=(0, 5))
+
+    # Button to submit login information, with validation checks
     ttk.Button(frame, text="Login", command=lambda: validate_login(email.get().strip(), password.get().strip())).pack()
+    # Button to return to the main menu
     ttk.Button(frame, text="Back", command=lambda: frames["main"].tkraise()).pack(pady=5)
+
+    # Message label for user feedback on login actions
     user_message = ttk.Label(frame, text="")
     user_message.pack()
 
+    # Validate provided email and password against database records
     def validate_login(email_u: str, passw: str) -> None:
         if validate_email(email_u) and passw != "":
             if check_login(email_u, passw.encode("utf-8")):
+                # Clear entry fields on successful login
                 email.delete(0, "end")
                 password.delete(0, "end")
+                # Switch to portal frame
                 frames["portal"].tkraise()
             else:
-                user_message.config(text="Invalid email or password")
+                user_message.config(text="Invalid email and/or password")
         elif not validate_email(email_u):
-            user_message.config(text="Invalid email or password")
+            user_message.config(text="Invalid email and/or password")
         else:
             user_message.config(text="Please enter required information")
 
