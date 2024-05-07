@@ -11,6 +11,7 @@ from Teacher import Teacher
 from Admin import Admin
 from Course import Course
 from Grade import Grade
+from typing import Union
 
 # Constant for database file path
 DBFILE: str = "roll_call.db"
@@ -20,7 +21,7 @@ custom_font1: tuple = ("Helvetica", 15)
 custom_font2: tuple = ("Helvetica", 13)
 
 # Current logged-in user, instance of type Person (Student, Teacher, Admin)
-user: Person
+user: Union[Person, Student, Teacher, Admin]
 
 
 def main() -> None:
@@ -166,8 +167,8 @@ def validate_password(hash_pass1: bytes, hash_pass2: bytes) -> bool:
 def create_new_user(firstname: str, surname: str, birth: str, email: str, password: bytes) -> None:
     with sqlite3.connect(DBFILE) as db:
         cur = db.cursor()
-        cur.execute("INSERT INTO User VALUES (null, ?, ?, ?, ?, null, ?, null)", (firstname, surname, birth,
-                                                                                  email, password))
+        cur.execute("INSERT INTO User VALUES (null, ?, ?, ?, ?, null, ?, null)", (firstname, surname,
+                                                                                  birth, email, password))
 
 
 # Set up initial GUI components and allow user to login or register
