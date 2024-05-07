@@ -346,22 +346,43 @@ def user_portal(frame, frames) -> None:
             widget.destroy()
 
         if context == "account":
-            frame0 = tk.Frame(content_frame, bg="red")
-            frame0.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
-            frame1 = tk.Frame(frame0)
-            frame1.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-            frame2 = tk.Frame(frame0)
-            frame2.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-            frame3 = tk.Frame(content_frame, bg="red")
-            frame3.pack(side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
+            frame0 = tk.Frame(content_frame)
+            frame0.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
+            frame01 = tk.Frame(frame0)
+            frame01.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+            frame02 = tk.Frame(frame0)
+            frame02.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
 
-            tk.Label(frame1, text=f"ID: {user.id}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
-            tk.Label(frame1, text=f"Name: {user.name} {user.surname}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
-            tk.Label(frame1, text=f"Birthdate: {user.birthdate}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
-            tk.Label(frame2, text=f"Email: {user.email}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
-            tk.Label(frame2, text=f"University Email: {user.uniEmail}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
-            tk.Label(frame2, text=f"Degree:", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
-            tk.Label(frame3, text="Settings:", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            frame1 = tk.Frame(content_frame)
+            frame1.pack(side=tk.TOP, fill=tk.X, anchor="n")
+
+            frame2 = tk.Frame(content_frame)
+            frame2.pack(side=tk.TOP, fill=tk.X, anchor="n")
+            frame21 = tk.Frame(frame2)
+            frame21.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+            frame22 = tk.Frame(frame2)
+            frame22.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+
+            tk.Label(frame01, text=f"ID: {user.id}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame01, text=f"Name: {user.name} {user.surname}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame01, text=f"Birthdate: {user.birthdate}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame02, text=f"Email: {user.email}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame02, text=f"University Email: {user.uniEmail}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame02, text=f"Degree: {user.degree}" , font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame1, text="Settings:", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame21, text="Email:", font=custom_font2).pack(padx=15, anchor="nw")
+            email = ttk.Entry(frame21)
+            email.pack(pady=(15, 0), padx=15, anchor="nw")
+            tk.Label(frame22, text="Password:", font=custom_font2).pack(padx=15, anchor="nw")
+            password1 = ttk.Entry(frame22)
+            password1.pack(pady=(15, 0), padx=15, anchor="nw")
+            password2 = ttk.Entry(frame22)
+            password2.pack(pady=(15, 0), padx=15, anchor="nw")
+            setting_message = tk.Label(content_frame, text="")
+            setting_message.pack()
+            tk.Button(content_frame, text="Save", bg="#C9C9C9", font=custom_font2,
+                      command=lambda: setting_message.config(text=save_user_settings(email.get(), password1.get(),
+                                                                                     password2.get()))).pack()
 
         elif context == "courses":
             tk.Label(content_frame, text="Courses enrolled:").pack(pady=(15, 0))
@@ -372,6 +393,17 @@ def user_portal(frame, frames) -> None:
             tk.Label(content_frame, text="Calculus: A, Physics: B, Literature: A").pack(pady=(15, 0))
 
     update_content("account")
+
+
+def save_user_settings(email_u: str, pass1: str, pass2: str) -> str:
+    if not validate_email(email_u) and (len(pass1) < 8 or len(pass2) < 8):
+        return ""
+    elif validate_email(email_u) and (len(pass1) > 7 and len(pass2) > 7) and (len(pass1) == len(pass2)):
+        return "Updated email and password"
+    elif validate_email(email_u) and (len(pass1) < 8 or len(pass2) < 8):
+        return "Updated email"
+    elif (not validate_email(email_u) or email_u == "") and (len(pass1) > 7 and len(pass2) > 7) and (len(pass1) == len(pass2)):
+        return "Update password"
 
 
 if __name__ == "__main__":
