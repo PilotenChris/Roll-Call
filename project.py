@@ -36,82 +36,96 @@ def main() -> None:
 # Function to create the database with the required Tables and Fields
 # And inserts the required starting data
 def create_database() -> None:
-    con = sqlite3.connect(DBFILE)
-    cur = con.cursor()
-
-    # Create the table Account in the Database with required fields
-    cur.execute("CREATE TABLE Account(AccountId INTEGER NOT NULL UNIQUE," +
-                "AccountType TEXT NOT NULL UNIQUE," +
-                "PRIMARY KEY(AccountId AUTOINCREMENT))")
-
-    # Create the table User in the Database with required fields
-    cur.execute("CREATE TABLE User(Id INTEGER UNIQUE," +
-                "FirstName TEXT NOT NULL, Surname TEXT NOT NULL, Birth TEXT NOT NULL," +
-                "Email TEXT NOT NULL UNIQUE, UniEmail TEXT," +
-                "Password TEXT NOT NULL, Account INTEGER," +
-                "PRIMARY KEY(Id AUTOINCREMENT)," +
-                "FOREIGN KEY(Account) REFERENCES Account(AccountId))")
-
-    # Create the table Degrees in the Database with required fields
-    cur.execute("CREATE TABLE Degrees(DegreeId INTEGER NOT NULL UNIQUE," +
-                "DegreeName TEXT NOT NULL," +
-                "PRIMARY KEY(DegreeId AUTOINCREMENT))")
-
-    # Create the table Degree in the Database with required fields
-    cur.execute("CREATE TABLE Degree(UserId INTEGER NOT NULL," +
-                "DegreeId INTEGER NOT NULL," +
-                "FOREIGN KEY(UserId) REFERENCES User(Id)," +
-                "FOREIGN KEY(DegreeId) REFERENCES Degrees(DegreeId)," +
-                "PRIMARY KEY(UserId))")
-
-    # Create the table Course in the Database with required fields
-    cur.execute("CREATE TABLE Course(CourseId INTEGER NOT NULL UNIQUE," +
-                "CourseName TEXT NOT NULL," +
-                "PassingGrade INTEGER NOT NULL," +
-                "PRIMARY KEY(CourseId AUTOINCREMENT))")
-
-    # Create the table Grade in the Database with required fields
-    cur.execute("CREATE TABLE Grade(UserId INTEGER NOT NULL," +
-                "CourseId INTEGER NOT NULL," +
-                "Task INTEGER NOT NULL," +
-                "Grade INTEGER NOT NULL," +
-                "FOREIGN KEY(CourseId) REFERENCES Course(CourseId)," +
-                "FOREIGN KEY(UserId) REFERENCES User(Id)," +
-                "PRIMARY KEY(UserId, CourseId, Task))")
-
-    # Create the table Classes in the Database with required fields
-    cur.execute("CREATE TABLE Classes(UserId INTEGER NOT NULL," +
-                "Course INTEGER NOT NULL," +
-                "FOREIGN KEY(Course) REFERENCES Course(CourseId)," +
-                "FOREIGN KEY(UserId) REFERENCES User(Id)," +
-                "PRIMARY KEY(UserId, Course))")
-
-    # Triggers to automatically set the UniEmail and Account field upon new user insertion
-    cur.execute("CREATE TRIGGER CreateUniEmail AFTER INSERT ON User " + "\n" +
-                "BEGIN " + "\n" +
-                "UPDATE User SET UniEmail = NEW.Id || '@idkUniversity.com' WHERE Id = NEW.Id;" + "\n" +
-                "END;")
-
-    # Trigger to automatically assign the default account type to new users
-    cur.execute("CREATE TRIGGER AssignUser AFTER INSERT ON User " + "\n" +
-                "BEGIN " + "\n" +
-                "UPDATE User SET Account = 1 WHERE Id = NEW.Id;" + "\n" +
-                "END;")
-
-    # Insert the default data into table Account
-    cur.execute("INSERT INTO Account (AccountType) VALUES ('Student')," +
-                "('Teacher'), ('Admin')")
-
-    # Commit changes and close the database connection
-    con.commit()
-    con.close()
-
-
-# Checks the login credentials, retrieves user details from the database and initializes the global user object based on the role (Student, Teacher, Admin)
-def check_login(email: str, password: bytes) -> bool:
-    # Connect to the database and go through User to find password by email
     with sqlite3.connect(DBFILE) as db:
         cur = db.cursor()
+
+        # Create the table Account in the Database with required fields
+        cur.execute("CREATE TABLE Account(AccountId INTEGER NOT NULL UNIQUE," +
+                    "AccountType TEXT NOT NULL UNIQUE," +
+                    "PRIMARY KEY(AccountId AUTOINCREMENT))")
+
+        # Create the table User in the Database with required fields
+        cur.execute("CREATE TABLE User(Id INTEGER UNIQUE," +
+                    "FirstName TEXT NOT NULL, Surname TEXT NOT NULL, Birth TEXT NOT NULL," +
+                    "Email TEXT NOT NULL UNIQUE, UniEmail TEXT," +
+                    "Password TEXT NOT NULL, Account INTEGER," +
+                    "PRIMARY KEY(Id AUTOINCREMENT)," +
+                    "FOREIGN KEY(Account) REFERENCES Account(AccountId))")
+
+        # Create the table Degrees in the Database with required fields
+        cur.execute("CREATE TABLE Degrees(DegreeId INTEGER NOT NULL UNIQUE," +
+                    "DegreeName TEXT NOT NULL," +
+                    "PRIMARY KEY(DegreeId AUTOINCREMENT))")
+
+        # Create the table Degree in the Database with required fields
+        cur.execute("CREATE TABLE Degree(UserId INTEGER NOT NULL," +
+                    "DegreeId INTEGER NOT NULL," +
+                    "FOREIGN KEY(UserId) REFERENCES User(Id)," +
+                    "FOREIGN KEY(DegreeId) REFERENCES Degrees(DegreeId)," +
+                    "PRIMARY KEY(UserId))")
+
+        # Create the table Course in the Database with required fields
+        cur.execute("CREATE TABLE Course(CourseId INTEGER NOT NULL UNIQUE," +
+                    "CourseName TEXT NOT NULL," +
+                    "PassingGrade INTEGER NOT NULL," +
+                    "PRIMARY KEY(CourseId AUTOINCREMENT))")
+
+        # Create the table Grade in the Database with required fields
+        cur.execute("CREATE TABLE Grade(UserId INTEGER NOT NULL," +
+                    "CourseId INTEGER NOT NULL," +
+                    "Task INTEGER NOT NULL," +
+                    "Grade INTEGER NOT NULL," +
+                    "FOREIGN KEY(CourseId) REFERENCES Course(CourseId)," +
+                    "FOREIGN KEY(UserId) REFERENCES User(Id)," +
+                    "PRIMARY KEY(UserId, CourseId, Task))")
+
+        # Create the table Classes in the Database with required fields
+        cur.execute("CREATE TABLE Classes(UserId INTEGER NOT NULL," +
+                    "Course INTEGER NOT NULL," +
+                    "FOREIGN KEY(Course) REFERENCES Course(CourseId)," +
+                    "FOREIGN KEY(UserId) REFERENCES User(Id)," +
+                    "PRIMARY KEY(UserId, Course))")
+
+        # Triggers to automatically set the UniEmail and Account field upon new user insertion
+        cur.execute("CREATE TRIGGER CreateUniEmail AFTER INSERT ON User " + "\n" +
+                    "BEGIN " + "\n" +
+                    "UPDATE User SET UniEmail = NEW.Id || '@idkUniversity.com' WHERE Id = NEW.Id;" + "\n" +
+                    "END;")
+
+        # Trigger to automatically assign the default account type to new users
+        cur.execute("CREATE TRIGGER AssignUser AFTER INSERT ON User " + "\n" +
+                    "BEGIN " + "\n" +
+                    "UPDATE User SET Account = 1 WHERE Id = NEW.Id;" + "\n" +
+                    "END;")
+
+        # Insert the default data into table Account
+        cur.execute("INSERT INTO Account (AccountType) VALUES ('Student')," +
+                    "('Teacher'), ('Admin')")
+
+        # Insert the default data into table Degrees
+        cur.execute("INSERT INTO Degrees (DegreeName) VALUES ('Bachelors')," +
+                    "('Masters'), ('Doctorate')")
+
+        # Commit changes
+        db.commit()
+
+
+def insert_course(course_name: str, passing_grade: int) -> None:
+    with sqlite3.connect(DBFILE) as conn:
+        cur = conn.cursor()
+
+        # Insert a course into the database
+        cur.execute("INSERT INTO Course (CourseName, PassingGrade) VALUES (?, ?)",
+                    (course_name, passing_grade))
+        conn.commit()
+
+
+# Checks the login credentials, retrieves user details from the database and initializes the global user object based
+# on the role (Student, Teacher, Admin)
+def check_login(email: str, password: bytes) -> bool:
+    # Connect to the database and go through User to find password by email
+    with sqlite3.connect(DBFILE) as conn:
+        cur = conn.cursor()
         cur.execute("SELECT Password, id FROM User WHERE Email = ?", (email,))
         # If you found the Email, put password in the result, else put None in the result
         result = cur.fetchone()
@@ -165,10 +179,11 @@ def validate_password(hash_pass1: bytes, hash_pass2: bytes) -> bool:
 
 # Insert new user into 'User' database table with given personal and authentication details
 def create_new_user(firstname: str, surname: str, birth: str, email: str, password: bytes) -> None:
-    with sqlite3.connect(DBFILE) as db:
-        cur = db.cursor()
+    with sqlite3.connect(DBFILE) as conn:
+        cur = conn.cursor()
         cur.execute("INSERT INTO User VALUES (null, ?, ?, ?, ?, null, ?, null)", (firstname, surname,
                                                                                   birth, email, password))
+        conn.commit()
 
 
 # Set up initial GUI components and allow user to login or register
