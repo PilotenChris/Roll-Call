@@ -110,7 +110,7 @@ def create_database() -> None:
                     "FOREIGN KEY(CourseId) REFERENCES Course(CourseId))")
 
         #
-        cur.execute("CREATE TABLE Class(CourseId INTEGER NOT NULL," +
+        cur.execute("CREATE TABLE Connection(CourseId INTEGER NOT NULL," +
                     "BaseId INTEGER NOT NULL," +
                     "DegreeBNId INTEGER NOT NULL," +
                     "TypeId INTEGER NOT NULL," +
@@ -144,6 +144,27 @@ def create_database() -> None:
         # Insert the default data into table DegreeType
         cur.execute("INSERT INTO DegreeType (TypeName) VALUES ('Zoology')," +
                     "('Wildlife Management'), ('Entomology')")
+
+        cur.execute("INSERT INTO Degrees VALUES (1,1,1), (1,1,2), (1,1,3)," +
+                    "(2,1,1), (2,1,2), (2,1,3), (3,1,1), (3,1,2), (3,1,3)")
+
+        # Dummy data
+        cur.execute("INSERT INTO Degree VALUES (1,3,1,1)")
+
+        cur.execute("INSERT INTO Course VALUES (null, 'Zoology', 50, 1)," +
+                    "(null, 'Botany', 50, 1), (null, 'Genetics', 50, 1)," +
+                    "(null, 'Biochemistry', 50, 1), (null, 'Entomology', 50, 1)," +
+                    "(null, 'Geography', 50, 1), (null, 'Mathematics', 50, 1)," +
+                    "(null, 'Physics ', 50, 1), (null, 'Chemistry', 50, 1)," +
+                    "(null, 'Biostatistics', 50, 1), (null, 'Thesis Zoology', 50, 1)," +
+                    "(null, 'Dissertation Zoology', 50, 1)")
+
+        cur.execute("INSERT INTO Connection VALUES (1, 1,1,1)," +
+                    "(2, 1,1,1), (3, 1,1,1), (4, 1,1,1), (5, 1,1,1)," +
+                    "(6, 1,1,1), (7, 1,1,1), (8, 1,1,1), (9, 1,1,1)," +
+                    "(10, 1,1,1), (11, 3,1,1), (12, 2,1,1)")
+
+        cur.execute("INSERT INTO CourseEnrollments VALUES (1, 11, 2024-05-23, 1)")
 
         # Commit changes
         db.commit()
