@@ -52,39 +52,71 @@ def create_database() -> None:
                     "PRIMARY KEY(Id AUTOINCREMENT)," +
                     "FOREIGN KEY(Account) REFERENCES Account(AccountId))")
 
-        # Create the table Degrees in the Database with required fields
-        cur.execute("CREATE TABLE Degrees(DegreeId INTEGER NOT NULL UNIQUE," +
-                    "DegreeName TEXT NOT NULL," +
-                    "PRIMARY KEY(DegreeId AUTOINCREMENT))")
+        #
+        cur.execute("CREATE TABLE DegreeBase(BaseId INTEGER NOT NULL," +
+                    "BaseName TEXT NOT NULL UNIQUE," +
+                    "PRIMARY KEY(BaseId AUTOINCREMENT))")
+
+        #
+        cur.execute("CREATE TABLE DegreeBaseName(DegreeBNId INTEGER NOT NULL," +
+                    "DegreeBName TEXT NOT NULL UNIQUE," +
+                    "PRIMARY KEY(DegreeBNId AUTOINCREMENT))")
+
+        #
+        cur.execute("CREATE TABLE DegreeType(TypeId INTEGER NOT NULL," +
+                    "TypeName TEXT NOT NULL UNIQUE," +
+                    "PRIMARY KEY(TypeId AUTOINCREMENT))")
 
         # Create the table Degree in the Database with required fields
+        cur.execute("CREATE TABLE Degrees(BaseId INTEGER NOT NULL," +
+                    "DegreeBNId INTEGER NOT NULL," +
+                    "TypeId INTEGER NOT NULL," +
+                    "PRIMARY KEY(BaseId, DegreeBNId, TypeId)," +
+                    "FOREIGN KEY(BaseId) REFERENCES DegreeBase(BaseId)" +
+                    "FOREIGN KEY(TypeId) REFERENCES DegreeType(TypeId)" +
+                    "FOREIGN KEY(DegreeBNId) REFERENCES DegreeBaseName(DegreeBNId))")
+
+        #
         cur.execute("CREATE TABLE Degree(UserId INTEGER NOT NULL," +
-                    "DegreeId INTEGER NOT NULL," +
+                    "BaseId INTEGER NOT NULL," +
+                    "DegreeBNId INTEGER NOT NULL," +
+                    "TypeId INTEGER NOT NULL," +
+                    "PRIMARY KEY(UserId, BaseId, DegreeBNId, TypeId)," +
                     "FOREIGN KEY(UserId) REFERENCES User(Id)," +
-                    "FOREIGN KEY(DegreeId) REFERENCES Degrees(DegreeId)," +
-                    "PRIMARY KEY(UserId))")
+                    "FOREIGN KEY(BaseId, DegreeBNId, TypeId) REFERENCES Degrees(BaseId, DegreeBNId, TypeId))")
 
         # Create the table Course in the Database with required fields
-        cur.execute("CREATE TABLE Course(CourseId INTEGER NOT NULL UNIQUE," +
+        cur.execute("CREATE TABLE Course(CourseId INTEGER NOT NULL," +
                     "CourseName TEXT NOT NULL," +
                     "PassingGrade INTEGER NOT NULL," +
+                    "Active INTEGER NOT NULL," +
                     "PRIMARY KEY(CourseId AUTOINCREMENT))")
 
         # Create the table Grade in the Database with required fields
         cur.execute("CREATE TABLE Grade(UserId INTEGER NOT NULL," +
                     "CourseId INTEGER NOT NULL," +
-                    "Task INTEGER NOT NULL," +
                     "Grade INTEGER NOT NULL," +
                     "FOREIGN KEY(CourseId) REFERENCES Course(CourseId)," +
                     "FOREIGN KEY(UserId) REFERENCES User(Id)," +
-                    "PRIMARY KEY(UserId, CourseId, Task))")
+                    "PRIMARY KEY(UserId, CourseId))")
 
         # Create the table Classes in the Database with required fields
-        cur.execute("CREATE TABLE Classes(UserId INTEGER NOT NULL," +
-                    "Course INTEGER NOT NULL," +
-                    "FOREIGN KEY(Course) REFERENCES Course(CourseId)," +
+        cur.execute("CREATE TABLE CourseEnrollments(UserId INTEGER NOT NULL," +
+                    "CourseId INTEGER NOT NULL," +
+                    "StartDate TEXT NOT NULL," +
+                    "Assigned INTEGER NOT NULL," +
+                    "PRIMARY KEY(UserId, CourseId, StartDate)," +
                     "FOREIGN KEY(UserId) REFERENCES User(Id)," +
-                    "PRIMARY KEY(UserId, Course))")
+                    "FOREIGN KEY(CourseId) REFERENCES Course(CourseId))")
+
+        #
+        cur.execute("CREATE TABLE Class(CourseId INTEGER NOT NULL," +
+                    "BaseId INTEGER NOT NULL," +
+                    "DegreeBNId INTEGER NOT NULL," +
+                    "TypeId INTEGER NOT NULL," +
+                    "PRIMARY KEY(CourseId, BaseId, DegreeBNId, TypeId)," +
+                    "FOREIGN KEY(CourseId) REFERENCES Course(CourseId)," +
+                    "FOREIGN KEY(BaseId, DegreeBNId, TypeId) REFERENCES Degrees(BaseId, DegreeBNId, TypeId))")
 
         # Triggers to automatically set the UniEmail and Account field upon new user insertion
         cur.execute("CREATE TRIGGER CreateUniEmail AFTER INSERT ON User " + "\n" +
@@ -102,9 +134,16 @@ def create_database() -> None:
         cur.execute("INSERT INTO Account (AccountType) VALUES ('Student')," +
                     "('Teacher'), ('Admin')")
 
-        # Insert the default data into table Degrees
-        cur.execute("INSERT INTO Degrees (DegreeName) VALUES ('Bachelors')," +
-                    "('Masters'), ('Doctorate')")
+        # Insert the default data into table DegreeBase
+        cur.execute("INSERT INTO DegreeBase (BaseName) VALUES ('Bachelors')," +
+                    "('Masters'), ('Doctor of Philosophy')")
+
+        # Insert the default data into table DegreeBaseName
+        cur.execute("INSERT INTO DegreeBaseName (DegreeBName) VALUES ('Science')")
+
+        # Insert the default data into table DegreeType
+        cur.execute("INSERT INTO DegreeType (TypeName) VALUES ('Zoology')," +
+                    "('Wildlife Management'), ('Entomology')")
 
         # Commit changes
         db.commit()
