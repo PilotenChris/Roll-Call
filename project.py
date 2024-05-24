@@ -205,11 +205,41 @@ def check_login(email: str, password: bytes) -> bool:
         person_result = cur.fetchone()
         global user
 
+        # Retrieve degree of user based on the user ID
+        cur.execute("SELECT BaseId, DegreeBNId, TypeId FROM Degree WHERE UserId = ?", (stored_id,))
+        degree_list = cur.fetchone()
+
+        # Empty string of the full degree of the user
+        full_degree: str = ""
+
+        # Retrieve the name for DegreeBase, DegreeBaseName and DegreeType
+        # to get the full name of the degree of the user
+        if degree_list:
+            cur.execute("SELECT BaseName, DegreeBName, TypeName FROM DegreeBase, DegreeBaseName, DegreeType WHERE BaseId = ? AND DegreeBNId = ? AND TypeId = ?", (degree_list[0], degree_list[1], degree_list[2]))
+            degree_for_user = cur.fetchone()
+            full_degree += f"{degree_for_user[0]} of {degree_for_user[1]} {degree_for_user[2]}"
+
+        # Retrieve the courses ids the user is enrolled into based on the user ID
+        cur.execute("SELECT CourseId FROM CourseEnrollments WHERE Assigned = 1 AND UserId = ?", (stored_id,))
+        enrolld_courses = cur.fetchall()
+
+        # Empty list of courses
+        list_of_courses: list[Course] = []
+
+        # Retrieve the course details for each course the user has based on the course ID
+        if enrolld_courses:
+            for course_tuple in enrolld_courses:
+                course_id = course_tuple[0]
+                cur.execute("SELECT CourseName, PassingGrade, Active FROM Course WHERE COurseId = ?", (course_id,))
+                enrolld_course = cur.fetchone()
+                list_of_courses.append(Course(course_id, enrolld_course[0], enrolld_course[1], enrolld_course[2]))
+
+
         # Check the user's account type and initialize the corresponding object
         if person_result[5] == 1:
             print("1")
             user = Student(stored_id, person_result[0], person_result[1], person_result[2], person_result[3],
-                           person_result[4], "", [], [])
+                           person_result[4], full_degree, list_of_courses, [])
             print(user)
         elif person_result[5] == 2:
             print("2")

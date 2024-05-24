@@ -14,8 +14,8 @@ class Student(Person):
     def __str__(self) -> str:
         course: list[str] = []
         for i in self._courses:
-            course.append(f"{i.id} {i.name}, ")
-        return f"{super().__str__()}, Degree: {self._degree}, Courses: {''.join(course)}, Grades: {self._grades}"
+            course.append(f"{i.id} {i.name}")
+        return f"{super().__str__()}, Degree: {self._degree}, Courses: {', '.join(course)}, Grades: {self._grades}"
 
     @property
     def degree(self) -> str:
