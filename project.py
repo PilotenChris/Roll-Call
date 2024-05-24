@@ -215,7 +215,9 @@ def check_login(email: str, password: bytes) -> bool:
         # Retrieve the name for DegreeBase, DegreeBaseName and DegreeType
         # to get the full name of the degree of the user
         if degree_list:
-            cur.execute("SELECT BaseName, DegreeBName, TypeName FROM DegreeBase, DegreeBaseName, DegreeType WHERE BaseId = ? AND DegreeBNId = ? AND TypeId = ?", (degree_list[0], degree_list[1], degree_list[2]))
+            cur.execute(
+                "SELECT BaseName, DegreeBName, TypeName FROM DegreeBase, DegreeBaseName, DegreeType WHERE BaseId = ? AND DegreeBNId = ? AND TypeId = ?",
+                (degree_list[0], degree_list[1], degree_list[2]))
             degree_for_user = cur.fetchone()
             full_degree += f"{degree_for_user[0]} of {degree_for_user[1]} {degree_for_user[2]}"
 
@@ -233,7 +235,6 @@ def check_login(email: str, password: bytes) -> bool:
                 cur.execute("SELECT CourseName, PassingGrade, Active FROM Course WHERE COurseId = ?", (course_id,))
                 enrolld_course = cur.fetchone()
                 list_of_courses.append(Course(course_id, enrolld_course[0], enrolld_course[1], enrolld_course[2]))
-
 
         # Check the user's account type and initialize the corresponding object
         if person_result[5] == 1:
@@ -281,7 +282,7 @@ def create_new_user(firstname: str, surname: str, birth: str, email: str, passwo
 # Set up initial GUI components and allow user to login or register
 def start() -> None:
     window = tk.Tk()
-    window.geometry("700x400")
+    window.geometry("1000x500")
 
     # Create frames and store them in a dictionary for easy access
     frames = {
@@ -430,8 +431,20 @@ def user_portal(frame, frames) -> None:
     sidebar = tk.Frame(frames["portal"], bg="#C9C9C9")
     sidebar.pack(ipadx=20, fill=tk.Y, side=tk.LEFT)
 
-    content_frame = tk.Frame(frames["portal"])
+    canvas = tk.Canvas(frames["portal"])
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    scrollbar = tk.Scrollbar(frames["portal"], orient="vertical", command=canvas.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    wrapper_frame = tk.Frame(canvas)
+    canvas.create_window((0, 0), window=wrapper_frame, anchor="n")
+
+    content_frame = tk.Frame(wrapper_frame)
     content_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    wrapper_frame.bind("<Configure>", lambda event, canvas=canvas: canvas.configure(scrollregion=canvas.bbox("all")))
+    canvas.configure(yscrollcommand=scrollbar.set)
 
     account = tk.Button(sidebar, text="Account", bg="#C9C9C9", font=custom_font1,
                         command=lambda: update_content(content_frame, "account"))
@@ -482,16 +495,29 @@ def update_content(content_frame: tk.Frame, context: str) -> None:
 
         frame10 = tk.Frame(content_frame)
         frame10.pack(side=tk.TOP, fill=tk.X, anchor="n")
-        frame11 = tk.Frame(frame10, bg="red")
+        frame11 = tk.Frame(frame10, bg="#C9C9C9")
         frame11.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-        frame12 = tk.Frame(frame10, bg="blue")
+        frame12 = tk.Frame(frame10, bg="#C9C9C9")
         frame12.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-        frame13 = tk.Frame(frame10, bg="green")
+        frame13 = tk.Frame(frame10, bg="#C9C9C9")
         frame13.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
 
     elif context == "grades":
-        tk.Label(content_frame, text="Recent Grades:").pack(pady=(15, 0))
-        tk.Label(content_frame, text="Calculus: A, Physics: B, Literature: A").pack(pady=(15, 0))
+        frame00 = tk.Frame(content_frame)
+        frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
+        frame01 = tk.Frame(frame00)
+        frame01.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
+
+        tk.Label(frame01, text="Current Courses", font=custom_font2).pack(padx=15, anchor="n")
+        for course in user.courses:
+            frame02 = tk.Frame(frame00, bg="#C9C9C9")
+            frame02.pack(pady=(15, 0), padx=(15, 15), side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
+            frame021 = tk.Frame(frame02, bg="#C9C9C9")
+            frame021.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+            frame022 = tk.Frame(frame02, bg="#C9C9C9")
+            frame022.pack(pady=(15, 15), padx=(15, 15), side=tk.RIGHT, fill=tk.X, expand=True, anchor="ne")
+            tk.Label(frame021, text=course.name, font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="nw")
+            tk.Label(frame022, text="Grade", font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="ne")
 
 
 def filter_courses(event) -> str:
