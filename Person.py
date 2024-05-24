@@ -8,8 +8,8 @@ class Person:
         self.uniEmail: str = uniEmail
 
     def __str__(self) -> str:
-        return (f"ID: {self._id}, First name: {self._name}, Surname: {self._surname}, Birthdate: {self._birthdate}, "
-                f"Email: {self._email}, University email: {self._uniEmail}")
+        return (f"ID: {self.id}, First name: {self.name}, Surname: {self.surname}, Birthdate: {self.birthdate}, "
+                f"Email: {self.email}, University email: {self.uniEmail}")
 
     @property
     def id(self) -> int:

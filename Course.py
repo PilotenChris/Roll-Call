@@ -3,14 +3,14 @@ import Student
 
 
 class Course:
-    def __init__(self, id: int, name: str, teachers: list[Teacher], students: list[Student]):
+    def __init__(self, id: int, name: str, passing_grade: int, active_status: int):
         self.id: int = id
         self.name: str = name
-        self.teachers: list[Teacher] = teachers
-        self.students: list[Student] = students
+        self.passing_grade: int = passing_grade
+        self.active_status: int = active_status
 
     def __str__(self) -> str:
-        return f"ID: {self._id}, Course name: {self._name}, Teachers: {self._teachers}, Students: {self._students}"
+        return f"ID: {self.id}, Course name: {self.name}, Passing grade: {self.passing_grade}, Active status: {self.active_status}"
 
     @property
     def id(self) -> int:
@@ -29,17 +29,17 @@ class Course:
         self._name: str = name
 
     @property
-    def teachers(self) -> list[Teacher]:
-        return self._teachers
+    def passing_grade(self) -> int:
+        return self._passing_grade
 
-    @teachers.setter
-    def teachers(self, teachers: list[Teacher]) -> None:
-        self._teachers: list[Teacher] = teachers
+    @passing_grade.setter
+    def passing_grade(self, passing_grade: int) -> None:
+        self._passing_grade: int = passing_grade
 
     @property
-    def students(self) -> list[Student]:
-        return self._students
+    def active_status(self) -> int:
+        return self._active_status
 
-    @students.setter
-    def students(self, students: list[Student]) -> None:
-        self._students: list[Student] = students
+    @active_status.setter
+    def active_status(self, active_status: int) -> None:
+        self._active_status: int = active_status
