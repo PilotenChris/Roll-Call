@@ -23,6 +23,8 @@ custom_font2: tuple = ("Helvetica", 13)
 # Current logged-in user, instance of type Person (Student, Teacher, Admin)
 user: Union[Person, Student, Teacher, Admin]
 
+filter_options: list[str] = ["All courses", "Courses for degree", "Courses I am taking"]
+
 
 def main() -> None:
     # Check if database file exists, if not create new database
@@ -424,22 +426,70 @@ def update_content(content_frame: tk.Frame, context: str) -> None:
         widget.destroy()
 
     if context == "account":
-        frame00 = tk.Frame(content_frame)
-        frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
-        user_account_detail(frame00)
-        frame10 = tk.Frame(content_frame)
-        frame10.pack(side=tk.TOP, fill=tk.X, anchor="n")
-        frame20 = tk.Frame(content_frame)
-        frame20.pack(side=tk.TOP, fill=tk.X, anchor="n")
-        user_account_setting(frame10, frame20, content_frame)
+        user_account(content_frame)
 
     elif context == "courses":
-        tk.Label(content_frame, text="Courses enrolled:").pack(pady=(15, 0))
-        tk.Label(content_frame, text="Calculus, Physics, Literature").pack(pady=(15, 0))
+        frame00 = tk.Frame(content_frame)
+        frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
+        frame01 = tk.Frame(frame00)
+        frame01.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+        frame02 = tk.Frame(frame00)
+        frame02.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+        frame03 = tk.Frame(frame00)
+        frame03.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+
+        tk.Label(frame01, text="Search Courses", font=custom_font2).pack(padx=15, anchor="nw")
+        search = ttk.Entry(frame02, width=40)
+        search.pack(padx=15, anchor="nw")
+
+        # Label for the filter combobox
+        tk.Label(frame03, text="Filter", font=custom_font2).pack(side=tk.LEFT, padx=(0, 5))
+
+        # Create a Combobox for the filter options
+        filter_combobox = ttk.Combobox(frame03, font=custom_font2, values=filter_options, state='readonly')
+        filter_combobox.pack(padx=15, anchor="nw", side=tk.LEFT)
+        filter_combobox.bind("<<ComboboxSelected>>", filter_courses)
+
+        frame10 = tk.Frame(content_frame)
+        frame10.pack(side=tk.TOP, fill=tk.X, anchor="n")
+        frame11 = tk.Frame(frame10, bg="red")
+        frame11.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+        frame12 = tk.Frame(frame10, bg="blue")
+        frame12.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+        frame13 = tk.Frame(frame10, bg="green")
+        frame13.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
 
     elif context == "grades":
         tk.Label(content_frame, text="Recent Grades:").pack(pady=(15, 0))
         tk.Label(content_frame, text="Calculus: A, Physics: B, Literature: A").pack(pady=(15, 0))
+
+
+def filter_courses(event) -> str:
+    option = event.widget.get()
+    match option:
+        case "All courses":
+            print("All courses")
+            return "All courses"
+        case "Courses for degree":
+            print("Courses for degree")
+            return "Courses for degree"
+        case "Courses I am taking":
+            print("Courses I am taking")
+            return "Courses I am taking"
+        case _:
+            print("")
+            return ""
+
+
+def user_account(content_frame: tk.Frame) -> None:
+    frame00 = tk.Frame(content_frame)
+    frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
+    user_account_detail(frame00)
+    frame10 = tk.Frame(content_frame)
+    frame10.pack(side=tk.TOP, fill=tk.X, anchor="n")
+    frame20 = tk.Frame(content_frame)
+    frame20.pack(side=tk.TOP, fill=tk.X, anchor="n")
+    user_account_setting(frame10, frame20, content_frame)
 
 
 def user_account_detail(frame00: tk.Frame) -> None:
