@@ -24,6 +24,7 @@ custom_font2: tuple = ("Helvetica", 13)
 user: Union[Person, Student, Teacher, Admin]
 
 filter_options: list[str] = ["All courses", "Courses for degree", "Courses I am taking"]
+courses_filter_list: list[Course] = []
 
 
 def main() -> None:
@@ -498,14 +499,13 @@ def update_content(content_frame: tk.Frame, context: str) -> None:
         filter_combobox.pack(padx=15, anchor="nw", side=tk.LEFT)
         filter_combobox.bind("<<ComboboxSelected>>", filter_courses)
 
-        frame10 = tk.Frame(content_frame)
-        frame10.pack(side=tk.TOP, fill=tk.X, anchor="n")
-        frame11 = tk.Frame(frame10, bg="#C9C9C9")
-        frame11.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-        frame12 = tk.Frame(frame10, bg="#C9C9C9")
-        frame12.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-        frame13 = tk.Frame(frame10, bg="#C9C9C9")
-        frame13.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+        for course in courses_filter_list:
+            frame10 = tk.Frame(content_frame)
+            frame10.pack(side=tk.TOP, fill=tk.X, anchor="n")
+            frame11 = tk.Frame(frame10, bg="#C9C9C9")
+            frame11.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+            tk.Label(frame11, text=f"{course.name} - Active: {'Yes' if course.active_status == 1 else 'No'}",
+                     font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="nw")
 
     elif context == "grades":
         frame00 = tk.Frame(content_frame)
@@ -535,7 +535,9 @@ def filter_courses(event) -> str:
             print("Courses for degree")
             return "Courses for degree"
         case "Courses I am taking":
-            print("Courses I am taking")
+            global courses_filter_list
+            courses_filter_list.clear()
+            courses_filter_list = user.courses
             return "Courses I am taking"
         case _:
             print("")
