@@ -23,6 +23,8 @@ custom_font2: tuple = ("Helvetica", 13)
 # Current logged-in user, instance of type Person (Student, Teacher, Admin)
 user: Union[Person, Student, Teacher, Admin]
 
+all_courses_list: list[Course] = []
+
 filter_options: list[str] = ["All courses", "Courses for degree", "Courses I am taking"]
 courses_filter_list: list[Course] = []
 
@@ -186,6 +188,26 @@ def insert_course(course_name: str, passing_grade: int) -> None:
         cur.execute("INSERT INTO Course (CourseName, PassingGrade) VALUES (?, ?)",
                     (course_name, passing_grade))
         conn.commit()
+
+
+def get_all_courses() -> None:
+    with sqlite3.connect(DBFILE) as conn:
+        cur = conn.cursor()
+
+        # Retrieve all the courses from the database
+        cur.execute("SELECT CourseId, CourseName, PassingGrade, Active FROM Course")
+        all_courses_from_database = cur.fetchall()
+
+        global all_courses_list
+
+        if all_courses_from_database:
+            all_courses_list.clear()
+            for course_tuple in all_courses_from_database:
+                course_id = course_tuple[0]
+                course_name = course_tuple[1]
+                course_pass_grade = course_tuple[2]
+                course_active = course_tuple[3]
+                all_courses_list.append(Course(course_id, course_name, course_pass_grade, course_active))
 
 
 # Checks the login credentials, retrieves user details from the database and initializes the global user object based
@@ -421,6 +443,9 @@ def login(frame, frames) -> None:
                 # Clear entry fields on successful login
                 email.delete(0, "end")
                 password.delete(0, "end")
+
+                # Call on getting all the courses
+                get_all_courses()
                 # Setup portal frame
                 user_portal(frames["portal"], frames)
                 # Switch to portal frame
