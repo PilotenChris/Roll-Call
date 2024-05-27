@@ -12,6 +12,7 @@ from Admin import Admin
 from Course import Course
 from Grade import Grade
 from typing import Union
+import copy
 
 # Constant for database file path
 DBFILE: str = "roll_call.db"
@@ -550,23 +551,20 @@ def update_content(content_frame: tk.Frame, context: str) -> None:
             tk.Label(frame022, text="Grade", font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="ne")
 
 
-def filter_courses(event) -> str:
+def filter_courses(event) -> None:
+    global courses_filter_list
     option = event.widget.get()
     match option:
         case "All courses":
-            print("All courses")
-            return "All courses"
+            courses_filter_list.clear()
+            courses_filter_list = copy.deepcopy(all_courses_list)
         case "Courses for degree":
             print("Courses for degree")
-            return "Courses for degree"
         case "Courses I am taking":
-            global courses_filter_list
             courses_filter_list.clear()
-            courses_filter_list = user.courses
-            return "Courses I am taking"
+            courses_filter_list = copy.deepcopy(user.courses)
         case _:
             print("")
-            return ""
 
 
 def user_account(content_frame: tk.Frame) -> None:
