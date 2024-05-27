@@ -190,12 +190,14 @@ def insert_course(course_name: str, passing_grade: int) -> None:
         conn.commit()
 
 
-def get_all_courses() -> None:
+def get_all_courses(userid: int) -> None:
     with sqlite3.connect(DBFILE) as conn:
         cur = conn.cursor()
 
         # Retrieve all the courses from the database
-        cur.execute("SELECT CourseId, CourseName, PassingGrade, Active FROM Course")
+        cur.execute("SELECT Course.CourseId, Course.CourseName, Course.PassingGrade, Course.Active FROM" +
+                    " Course, CourseEnrollments WHERE Course.CourseId = CourseEnrollments.CourseId AND" + 
+                    " Course.Active = 1 OR (CourseEnrollments.UserId = ? AND Course.Active = 0)", (userid,))
         all_courses_from_database = cur.fetchall()
 
         global all_courses_list
@@ -445,7 +447,7 @@ def login(frame, frames) -> None:
                 password.delete(0, "end")
 
                 # Call on getting all the courses
-                get_all_courses()
+                get_all_courses(user.id)
                 # Setup portal frame
                 user_portal(frames["portal"], frames)
                 # Switch to portal frame
