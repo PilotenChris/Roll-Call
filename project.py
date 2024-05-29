@@ -24,11 +24,13 @@ custom_font2: tuple = ("Helvetica", 13)
 # Current logged-in user, instance of type Person (Student, Teacher, Admin)
 user: Union[Person, Student, Teacher, Admin]
 
-all_courses_list: list[Course] = []
+FILTER_OPTIONS: list[str] = ["", "All courses", "Courses for degree", "Courses I am taking"]
 
-filter_options: list[str] = ["All courses", "Courses for degree", "Courses I am taking"]
 courses_filter_list: list[Course] = []
+all_courses_list: list[Course] = []
 all_courses_for_degree_list: list[Course] = []
+
+select_filter_value: int = 0
 
 
 def main() -> None:
@@ -513,7 +515,7 @@ def user_portal(frame, frames) -> None:
     content_frame = tk.Frame(wrapper_frame)
     content_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-    wrapper_frame.bind("<Configure>", lambda event, canvas=canvas: canvas.configure(scrollregion=canvas.bbox("all")))
+    wrapper_frame.bind("<Configure>", lambda event: canvas.configure(scrollregion=canvas.bbox("all")))
     canvas.configure(yscrollcommand=scrollbar.set)
 
     account = tk.Button(sidebar, text="Account", bg="#C9C9C9", font=custom_font1,
@@ -555,13 +557,28 @@ def update_content(content_frame: tk.Frame, context: str) -> None:
         search = ttk.Entry(frame02, width=40)
         search.pack(padx=15, anchor="nw")
 
-        # Label for the filter combobox
-        tk.Label(frame03, text="Filter", font=custom_font2).pack(side=tk.LEFT, padx=(0, 5))
+        filter_b = tk.Button(frame03, text="Filter", font=custom_font2, command=lambda: handle_filter())
+        filter_b.pack(side=tk.LEFT, padx=(0, 5))
 
-        # Create a Combobox for the filter options
-        filter_combobox = ttk.Combobox(frame03, font=custom_font2, values=filter_options, state='readonly')
+        filter_combobox = ttk.Combobox(frame03, font=custom_font2, values=FILTER_OPTIONS, state='readonly')
+        filter_combobox.current(select_filter_value)
         filter_combobox.pack(padx=15, anchor="nw", side=tk.LEFT)
         filter_combobox.bind("<<ComboboxSelected>>", filter_courses)
+
+        def handle_filter() -> None:
+            global select_filter_value
+            global courses_filter_list
+            search_list: list[Course] = []
+            select_filter_value = filter_combobox.current()
+            search_cat: str = search.get()
+            if search_cat != "":
+                select_filter_value = 0
+                courses_filter_list.clear()
+                for item in all_courses_list:
+                    if re.search(fr"^{search_cat}[a-zA-Z ]+$", item.name, re.IGNORECASE):
+                        search_list.append(Course(item.id, item.name, item.passing_grade, item.active_status))
+                courses_filter_list = search_list
+            update_content(content_frame, "courses")
 
         for course in courses_filter_list:
             frame10 = tk.Frame(content_frame)
@@ -597,12 +614,13 @@ def filter_courses(event) -> None:
             courses_filter_list.clear()
             courses_filter_list = copy.deepcopy(all_courses_list)
         case "Courses for degree":
-            print("Courses for degree")
+            courses_filter_list.clear()
+            courses_filter_list = copy.deepcopy(all_courses_for_degree_list)
         case "Courses I am taking":
             courses_filter_list.clear()
             courses_filter_list = copy.deepcopy(user.courses)
         case _:
-            print("")
+            courses_filter_list.clear()
 
 
 def user_account(content_frame: tk.Frame) -> None:
