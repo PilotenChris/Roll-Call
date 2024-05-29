@@ -28,6 +28,7 @@ all_courses_list: list[Course] = []
 
 filter_options: list[str] = ["All courses", "Courses for degree", "Courses I am taking"]
 courses_filter_list: list[Course] = []
+all_courses_for_degree_list: list[Course] = []
 
 
 def main() -> None:
@@ -148,34 +149,45 @@ def create_database() -> None:
         cur.execute("INSERT INTO DegreeBaseName (DegreeBName) VALUES ('Science')")
 
         # Insert the default data into table DegreeType
-        cur.execute("INSERT INTO DegreeType (TypeName) VALUES ('Zoology')," +
-                    "('Wildlife Management'), ('Entomology')")
+        cur.execute("INSERT INTO DegreeType (TypeName) VALUES ('Zoology'), " +
+                    "('Wildlife Management'), ('Entomology'), ('IT and IS')")
 
-        cur.execute("INSERT INTO Degrees VALUES (1,1,1), (1,1,2), (1,1,3)," +
-                    "(2,1,1), (2,1,2), (2,1,3), (3,1,1), (3,1,2), (3,1,3)")
+        # Insert the degrees build on DegreeBase, DegreeBaseName
+        # and DegreeType into Degrees
+        cur.execute("INSERT INTO Degrees VALUES (1,1,1), (1,1,2), (1,1,3), " +
+                    "(2,1,1), (2,1,2), (2,1,3), (3,1,1), (3,1,2), (3,1,3), " +
+                    "(1,1,4)")
 
         # Dummy data
         cur.execute("INSERT INTO Degree VALUES (1,3,1,1)")
 
-        cur.execute("INSERT INTO Course VALUES (null, 'Zoology', 50, 1)," +
-                    "(null, 'Botany', 50, 1), (null, 'Genetics', 50, 1)," +
-                    "(null, 'Biochemistry', 50, 1), (null, 'Entomology', 50, 1)," +
-                    "(null, 'Geography', 50, 1), (null, 'Mathematics', 50, 1)," +
-                    "(null, 'Physics ', 50, 1), (null, 'Chemistry', 50, 1)," +
-                    "(null, 'Biostatistics', 50, 1), (null, 'Thesis Zoology', 50, 1)," +
-                    "(null, 'Dissertation Zoology', 50, 1)")
+        cur.execute("INSERT INTO Course VALUES (null, 'Zoology', 50, 1), " +
+                    "(null, 'Botany', 50, 1), (null, 'Genetics', 50, 1), " +
+                    "(null, 'Biochemistry', 50, 1), (null, 'Entomology', 50, 1), " +
+                    "(null, 'Geography', 50, 1), (null, 'Mathematics', 50, 1), " +
+                    "(null, 'Physics ', 50, 1), (null, 'Chemistry', 50, 1), " +
+                    "(null, 'Biostatistics', 50, 1), (null, 'Thesis Zoology', 50, 1), " +
+                    "(null, 'Dissertation Zoology', 50, 1), (null, 'Geographic Information System', 50, 1), " +
+                    "(null, 'Object-Oriented Programming', 50, 1), (null, 'Application Development', 50, 1)")
 
         cur.execute("INSERT INTO Connection VALUES (1, 1,1,1)," +
                     "(2, 1,1,1), (3, 1,1,1), (4, 1,1,1), (5, 1,1,1)," +
                     "(6, 1,1,1), (7, 1,1,1), (8, 1,1,1), (9, 1,1,1)," +
-                    "(10, 1,1,1), (11, 3,1,1), (12, 2,1,1)")
+                    "(10, 1,1,1), (11, 3,1,1), (12, 2,1,1), " +
+                    "(13, 1,1,4), (14, 1,1,4), (15, 1,1,4)")
 
         cur.execute("INSERT INTO CourseEnrollments VALUES (1, 11, 2024-05-23, 1)," +
-                    "(1, 1, 2020-05-23, 1), (1, 2, 2020-05-23, 1)," +
-                    "(1, 3, 2020-05-23, 1), (1, 4, 2020-05-23, 1)," +
-                    "(1, 5, 2020-05-23, 1), (1, 6, 2020-05-23, 1)," +
-                    "(1, 7, 2020-05-23, 1), (1, 8, 2020-05-23, 1)," +
-                    "(1, 9, 2020-05-23, 1), (1, 10, 2020-05-23, 1)")
+                    "(1, 1, 2020-05-23, 1), (1, 2, 2020-05-23, 1), " +
+                    "(1, 3, 2020-05-23, 1), (1, 4, 2020-05-23, 1), " +
+                    "(1, 5, 2020-05-23, 1), (1, 6, 2020-05-23, 1), " +
+                    "(1, 7, 2020-05-23, 1), (1, 8, 2020-05-23, 1), " +
+                    "(1, 9, 2020-05-23, 1), (1, 10, 2020-05-23, 1), " +
+                    "(1, 12, 2023-05-23, 1)")
+
+        cur.execute("INSERT INTO Grade VALUES (1,1,63), (1,2,71), " +
+                    "(1,3,65), (1,4,74), (1,5,77), (1,6,79), " +
+                    "(1,7,60), (1,8,78), (1,9,72), (1,10,68), " +
+                    "(1,12,76)")
 
         # Commit changes
         db.commit()
@@ -209,6 +221,30 @@ def get_all_courses() -> None:
                 course_pass_grade = course_tuple[2]
                 course_active = course_tuple[3]
                 all_courses_list.append(Course(course_id, course_name, course_pass_grade, course_active))
+
+
+def get_all_courses_for_degree(user_id: int) -> None:
+    with sqlite3.connect(DBFILE) as conn:
+        cur = conn.cursor()
+
+        #
+        cur.execute("SELECT c.CourseId, c.CourseName, c.PassingGrade, c.Active FROM User AS u, Degree AS d, " +
+                    "Degrees AS deg, Connection AS con, Course AS c WHERE u.Id = d.UserId " +
+                    "AND d.DegreeBNId = deg.DegreeBNId AND deg.BaseId = con.BaseId " +
+                    "AND deg.DegreeBNId = con.DegreeBNId AND deg.TypeId = con.TypeId " +
+                    "AND con.CourseId = c.CourseId AND u.Id = ?", (user_id,))
+        all_courses_for_degree_from_database = cur.fetchall()
+
+        global all_courses_for_degree_list
+
+        if all_courses_for_degree_from_database:
+            all_courses_for_degree_list.clear()
+            for course_tuple in all_courses_for_degree_from_database:
+                course_id = course_tuple[0]
+                course_name = course_tuple[1]
+                course_pass_grade = course_tuple[2]
+                course_active = course_tuple[3]
+                all_courses_for_degree_list.append(Course(course_id, course_name, course_pass_grade, course_active))
 
 
 # Checks the login credentials, retrieves user details from the database and initializes the global user object based
@@ -245,7 +281,8 @@ def check_login(email: str, password: bytes) -> bool:
         # to get the full name of the degree of the user
         if degree_list:
             cur.execute(
-                "SELECT BaseName, DegreeBName, TypeName FROM DegreeBase, DegreeBaseName, DegreeType WHERE BaseId = ? AND DegreeBNId = ? AND TypeId = ?",
+                "SELECT BaseName, DegreeBName, TypeName FROM DegreeBase, DegreeBaseName, DegreeType " +
+                "WHERE BaseId = ? AND DegreeBNId = ? AND TypeId = ?",
                 (degree_list[0], degree_list[1], degree_list[2]))
             degree_for_user = cur.fetchone()
             full_degree += f"{degree_for_user[0]} of {degree_for_user[1]} {degree_for_user[2]}"
@@ -447,6 +484,7 @@ def login(frame, frames) -> None:
 
                 # Call on getting all the courses
                 get_all_courses()
+                get_all_courses_for_degree(user.id)
                 # Setup portal frame
                 user_portal(frames["portal"], frames)
                 # Switch to portal frame
