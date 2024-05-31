@@ -316,7 +316,6 @@ def check_login(email: str, password: bytes) -> bool:
                 list_of_graded_courses.append(Grade(Course(course_tuple[0], course_tuple[1], course_tuple[2],
                                                            course_tuple[3]), course_tuple[4]))
 
-
         # Check the user's account type and initialize the corresponding object
         if person_result[5] == 1:
             print("1")
