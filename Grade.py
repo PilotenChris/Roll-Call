@@ -7,7 +7,7 @@ class Grade:
         self.grades: int = grades
 
     def __str__(self) -> str:
-        return f"Course: {self.course}, Grades: {self.grades}"
+        return f"Course: {self.course.name}, Grades: {self.grades}"
 
     @property
     def course(self) -> Course:

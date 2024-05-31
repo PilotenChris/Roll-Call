@@ -32,6 +32,9 @@ all_courses_for_degree_list: list[Course] = []
 
 select_filter_value: int = 0
 
+window = tk.Tk()
+window.geometry("1000x500")
+
 
 def main() -> None:
     # Check if database file exists, if not create new database
@@ -361,9 +364,6 @@ def create_new_user(firstname: str, surname: str, birth: str, email: str, passwo
 
 # Set up initial GUI components and allow user to login or register
 def start() -> None:
-    window = tk.Tk()
-    window.geometry("1000x500")
-
     # Create frames and store them in a dictionary for easy access
     frames = {
         "main": ttk.Frame(window),
@@ -409,9 +409,23 @@ def create_user(frame, frames) -> None:
     surname = ttk.Entry(frame)
     surname.pack(pady=(0, 5))
 
-    ttk.Label(frame, text="Birthdate (YYYY-MM-DD)").pack()
-    birthdate = ttk.Entry(frame)
+    ttk.Label(frame, text="Birthdate").pack()
+    birthdate = ttk.Entry(frame, foreground="gray")
+    birthdate.insert(0, "YYYY-MM-DD")
     birthdate.pack(pady=(0, 5))
+
+    def on_entry_click(event) -> None:
+        if birthdate.get() == "YYYY-MM-DD":
+            birthdate.delete(0, tk.END)
+            birthdate.configure(foreground="black")
+
+    def on_focus_out(event) -> None:
+        if birthdate.get() == "":
+            birthdate.insert(0, "YYYY-MM-DD")
+            birthdate.configure(foreground="gray")
+
+    birthdate.bind("<FocusIn>", on_entry_click)
+    birthdate.bind("<FocusOut>", on_focus_out)
 
     ttk.Label(frame, text="Email").pack()
     email = ttk.Entry(frame)
@@ -542,7 +556,7 @@ def user_portal(frame, frames) -> None:
                        command=lambda: update_content(content_frame, "grades"))
     grades.pack(pady=(15, 0))
 
-    sign_out = tk.Button(sidebar, text="Sign Out", bg="#C9C9C9", font=custom_font1)
+    sign_out = tk.Button(sidebar, text="Sign Out", bg="#C9C9C9", font=custom_font1, command=lambda: window.quit())
     sign_out.pack(pady=15, side=tk.BOTTOM)
 
     update_content(content_frame, "account")
@@ -556,83 +570,10 @@ def update_content(content_frame: tk.Frame, context: str) -> None:
         user_account(content_frame)
 
     elif context == "courses":
-        frame00 = tk.Frame(content_frame)
-        frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
-        frame01 = tk.Frame(frame00)
-        frame01.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-        frame02 = tk.Frame(frame00)
-        frame02.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-        frame03 = tk.Frame(frame00)
-        frame03.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-
-        tk.Label(frame01, text="Search Courses", font=custom_font2).pack(padx=15, anchor="nw")
-        search = ttk.Entry(frame02, width=40)
-        search.pack(padx=15, anchor="nw")
-
-        filter_b = tk.Button(frame03, text="Filter", font=custom_font2, command=lambda: handle_filter())
-        filter_b.pack(side=tk.LEFT, padx=(0, 5))
-
-        filter_combobox = ttk.Combobox(frame03, font=custom_font2, values=FILTER_OPTIONS, state='readonly')
-        filter_combobox.current(select_filter_value)
-        filter_combobox.pack(padx=15, anchor="nw", side=tk.LEFT)
-        filter_combobox.bind("<<ComboboxSelected>>", filter_courses)
-
-        def handle_filter() -> None:
-            global select_filter_value
-            global courses_filter_list
-            search_list: list[Course] = []
-            select_filter_value = filter_combobox.current()
-            search_cat: str = search.get()
-            if search_cat != "":
-                select_filter_value = 0
-                courses_filter_list.clear()
-                for item in all_courses_list:
-                    if re.search(fr"^{search_cat}[a-zA-Z ]+$", item.name, re.IGNORECASE):
-                        search_list.append(Course(item.id, item.name, item.passing_grade, item.active_status))
-                courses_filter_list = search_list
-            update_content(content_frame, "courses")
-
-        for course in courses_filter_list:
-            frame10 = tk.Frame(content_frame)
-            frame10.pack(side=tk.TOP, fill=tk.X, anchor="n")
-            frame11 = tk.Frame(frame10, bg="#C9C9C9")
-            frame11.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-            tk.Label(frame11, text=f"{course.name} - Active: {'Yes' if course.active_status == 1 else 'No'}",
-                     font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="nw")
+        user_courses(content_frame)
 
     elif context == "grades":
-        frame00 = tk.Frame(content_frame)
-        frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
-        frame01 = tk.Frame(frame00)
-        frame01.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
-
-        tk.Label(frame01, text="Current Courses", font=custom_font2).pack(padx=15, anchor="n")
-        for course in user.courses:
-            frame02 = tk.Frame(frame00, bg="#C9C9C9")
-            frame02.pack(pady=(15, 0), padx=(15, 15), side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
-            frame021 = tk.Frame(frame02, bg="#C9C9C9")
-            frame021.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
-            frame022 = tk.Frame(frame02, bg="#C9C9C9")
-            frame022.pack(pady=(15, 15), padx=(15, 15), side=tk.RIGHT, fill=tk.X, expand=True, anchor="ne")
-            tk.Label(frame021, text=course.name, font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="nw")
-            tk.Label(frame022, text="Grade", font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="ne")
-
-
-def filter_courses(event) -> None:
-    global courses_filter_list
-    option = event.widget.get()
-    match option:
-        case "All courses":
-            courses_filter_list.clear()
-            courses_filter_list = copy.deepcopy(all_courses_list)
-        case "Courses for degree":
-            courses_filter_list.clear()
-            courses_filter_list = copy.deepcopy(all_courses_for_degree_list)
-        case "Courses I am taking":
-            courses_filter_list.clear()
-            courses_filter_list = copy.deepcopy(user.courses)
-        case _:
-            courses_filter_list.clear()
+        user_grades(content_frame)
 
 
 def user_account(content_frame: tk.Frame) -> None:
@@ -684,6 +625,94 @@ def user_account_setting(frame10: tk.Frame, frame20: tk.Frame, content_frame: tk
     tk.Button(content_frame, text="Save", bg="#C9C9C9", font=custom_font2,
               command=lambda: setting_message.config(text=save_user_settings(email.get(), password1.get(),
                                                                              password2.get()))).pack()
+
+
+def user_courses(content_frame: tk.Frame) -> None:
+    frame00 = tk.Frame(content_frame)
+    frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
+    frame01 = tk.Frame(frame00)
+    frame01.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+    frame02 = tk.Frame(frame00)
+    frame02.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+    frame03 = tk.Frame(frame00)
+    frame03.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+
+    tk.Label(frame01, text="Search Courses", font=custom_font2).pack(padx=15, anchor="nw")
+    search = ttk.Entry(frame02, width=40)
+    search.pack(padx=15, anchor="nw")
+
+    filter_b = tk.Button(frame03, text="Filter", font=custom_font2, command=lambda: handle_filter())
+    filter_b.pack(side=tk.LEFT, padx=(0, 5))
+
+    filter_combobox = ttk.Combobox(frame03, font=custom_font2, values=FILTER_OPTIONS, state='readonly')
+    filter_combobox.current(select_filter_value)
+    filter_combobox.pack(padx=15, anchor="nw", side=tk.LEFT)
+    filter_combobox.bind("<<ComboboxSelected>>", filter_courses)
+
+    def handle_filter() -> None:
+        global select_filter_value
+        global courses_filter_list
+        search_list: list[Course] = []
+        select_filter_value = filter_combobox.current()
+        search_cat: str = search.get()
+        if search_cat != "":
+            select_filter_value = 0
+            courses_filter_list.clear()
+            for item in all_courses_list:
+                if re.search(fr"^{search_cat}[a-zA-Z ]+$", item.name, re.IGNORECASE):
+                    search_list.append(Course(item.id, item.name, item.passing_grade, item.active_status))
+            courses_filter_list = search_list
+        update_content(content_frame, "courses")
+
+    for course in courses_filter_list:
+        frame10 = tk.Frame(content_frame)
+        frame10.pack(side=tk.TOP, fill=tk.X, anchor="n")
+        frame11 = tk.Frame(frame10, bg="#C9C9C9")
+        frame11.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+        tk.Label(frame11, text=f"{course.name} - Active: {'Yes' if course.active_status == 1 else 'No'}",
+                 font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="nw")
+
+
+def filter_courses(event) -> None:
+    global courses_filter_list
+    option = event.widget.get()
+    match option:
+        case "All courses":
+            courses_filter_list.clear()
+            courses_filter_list = copy.deepcopy(all_courses_list)
+        case "Courses for degree":
+            courses_filter_list.clear()
+            courses_filter_list = copy.deepcopy(all_courses_for_degree_list)
+        case "Courses I am taking":
+            courses_filter_list.clear()
+            courses_filter_list = copy.deepcopy(user.courses)
+        case _:
+            courses_filter_list.clear()
+
+
+def user_grades(content_frame: tk.Frame) -> None:
+    frame00 = tk.Frame(content_frame)
+    frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
+    frame01 = tk.Frame(frame00)
+    frame01.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
+
+    tk.Label(frame01, text="Current Courses", font=custom_font2).pack(padx=15, anchor="n")
+    for course in user.courses:
+        frame02 = tk.Frame(frame00, bg="#C9C9C9")
+        frame02.pack(pady=(15, 0), padx=(15, 15), side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
+        frame021 = tk.Frame(frame02, bg="#C9C9C9")
+        frame021.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+        frame022 = tk.Frame(frame02, bg="#C9C9C9")
+        frame022.pack(pady=(15, 15), padx=(15, 15), side=tk.RIGHT, fill=tk.X, expand=True, anchor="ne")
+        tk.Label(frame021, text=course.name, font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="nw")
+        tk.Label(frame022, text=grade_context(course), font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="ne")
+
+
+def grade_context(course: Course) -> str:
+    for grade in user.grades:
+        if grade.course.name == course.name:
+            return f"{grade.grades}/100"
+    return f"-/100"
 
 
 def save_user_settings(email_u: str, pass1: str, pass2: str) -> str:
