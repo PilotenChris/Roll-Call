@@ -306,7 +306,7 @@ def check_login(email: str, password: bytes) -> bool:
 
         # Retrieve the course and grade for each graded course for the user
         cur.execute("SELECT c.CourseId, c.CourseName, c.PassingGrade, c.Active, g.Grade FROM " +
-                    "Course AS c, Grade AS g WHERE c.CourseId = g.CourseId AND UserId = ?", (stored_id,))
+                    "Course AS c, Grade AS g WHERE c.CourseId = g.CourseId AND g.UserId = ?", (stored_id,))
         graded_courses = cur.fetchall()
 
         list_of_graded_courses: list[Grade] = []
