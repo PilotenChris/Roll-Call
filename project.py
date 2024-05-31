@@ -321,16 +321,12 @@ def check_login(email: str, password: bytes) -> bool:
 
         # Check the user's account type and initialize the corresponding object
         if person_result[5] == 1:
-            print("1")
             user = Student(stored_id, person_result[0], person_result[1], person_result[2], person_result[3],
                            person_result[4], full_degree, list_of_courses, list_of_graded_courses)
-            print(user)
         elif person_result[5] == 2:
-            print("2")
             user = Teacher(stored_id, person_result[0], person_result[1], person_result[2], person_result[3],
                            person_result[4], [])
         elif person_result[5] == 3:
-            print("3")
             user = Admin(stored_id, person_result[0], person_result[1], person_result[2], person_result[3],
                          person_result[4])
 
