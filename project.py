@@ -300,15 +300,28 @@ def check_login(email: str, password: bytes) -> bool:
         if enrolld_courses:
             for course_tuple in enrolld_courses:
                 course_id = course_tuple[0]
-                cur.execute("SELECT CourseName, PassingGrade, Active FROM Course WHERE COurseId = ?", (course_id,))
+                cur.execute("SELECT CourseName, PassingGrade, Active FROM Course WHERE CourseId = ?", (course_id,))
                 enrolld_course = cur.fetchone()
                 list_of_courses.append(Course(course_id, enrolld_course[0], enrolld_course[1], enrolld_course[2]))
+
+        # Retrieve the course and grade for each graded course for the user
+        cur.execute("SELECT c.CourseId, c.CourseName, c.PassingGrade, c.Active, g.Grade FROM " +
+                    "Course AS c, Grade AS g WHERE c.CourseId = g.CourseId AND UserId = ?", (stored_id,))
+        graded_courses = cur.fetchall()
+
+        list_of_graded_courses: list[Grade] = []
+
+        if graded_courses:
+            for course_tuple in graded_courses:
+                list_of_graded_courses.append(Grade(Course(course_tuple[0], course_tuple[1], course_tuple[2],
+                                                           course_tuple[3]), course_tuple[4]))
+
 
         # Check the user's account type and initialize the corresponding object
         if person_result[5] == 1:
             print("1")
             user = Student(stored_id, person_result[0], person_result[1], person_result[2], person_result[3],
-                           person_result[4], full_degree, list_of_courses, [])
+                           person_result[4], full_degree, list_of_courses, list_of_graded_courses)
             print(user)
         elif person_result[5] == 2:
             print("2")
