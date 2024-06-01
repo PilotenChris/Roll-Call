@@ -68,17 +68,17 @@ def create_database() -> None:
                     "PRIMARY KEY(Id AUTOINCREMENT)," +
                     "FOREIGN KEY(Account) REFERENCES Account(AccountId))")
 
-        #
+        # Create the table DegreeBase in the Database, to symbolise like "Bachelor" or other degrees
         cur.execute("CREATE TABLE DegreeBase(BaseId INTEGER NOT NULL," +
                     "BaseName TEXT NOT NULL UNIQUE," +
                     "PRIMARY KEY(BaseId AUTOINCREMENT))")
 
-        #
+        # Create the table DegreeBaseName in the Database, to symbolise like "of Science" or others
         cur.execute("CREATE TABLE DegreeBaseName(DegreeBNId INTEGER NOT NULL," +
                     "DegreeBName TEXT NOT NULL UNIQUE," +
                     "PRIMARY KEY(DegreeBNId AUTOINCREMENT))")
 
-        #
+        # Create the table DegreeType in the Database, to symbolide like "Zoology" or other degrees
         cur.execute("CREATE TABLE DegreeType(TypeId INTEGER NOT NULL," +
                     "TypeName TEXT NOT NULL UNIQUE," +
                     "PRIMARY KEY(TypeId AUTOINCREMENT))")
@@ -92,7 +92,7 @@ def create_database() -> None:
                     "FOREIGN KEY(TypeId) REFERENCES DegreeType(TypeId)" +
                     "FOREIGN KEY(DegreeBNId) REFERENCES DegreeBaseName(DegreeBNId))")
 
-        #
+        # Create the table Degree in the Database for linking the degree the user is taking
         cur.execute("CREATE TABLE Degree(UserId INTEGER NOT NULL," +
                     "BaseId INTEGER NOT NULL," +
                     "DegreeBNId INTEGER NOT NULL," +
@@ -125,7 +125,7 @@ def create_database() -> None:
                     "FOREIGN KEY(UserId) REFERENCES User(Id)," +
                     "FOREIGN KEY(CourseId) REFERENCES Course(CourseId))")
 
-        #
+        # Create the table Connection in the Database to connect courses to degrees
         cur.execute("CREATE TABLE Connection(CourseId INTEGER NOT NULL," +
                     "BaseId INTEGER NOT NULL," +
                     "DegreeBNId INTEGER NOT NULL," +
@@ -236,7 +236,7 @@ def get_all_courses_for_degree(user_id: int) -> None:
     with sqlite3.connect(DBFILE) as conn:
         cur = conn.cursor()
 
-        #
+        # Retrieve all the courses that the user is taking from the database
         cur.execute("SELECT c.CourseId, c.CourseName, c.PassingGrade, c.Active FROM User AS u, Degree AS d, " +
                     "Degrees AS deg, Connection AS con, Course AS c WHERE u.Id = d.UserId " +
                     "AND d.DegreeBNId = deg.DegreeBNId AND deg.BaseId = con.BaseId " +
