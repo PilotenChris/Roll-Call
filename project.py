@@ -24,14 +24,18 @@ custom_font2: tuple = ("Helvetica", 13)
 # Current logged-in user, instance of type Person (Student, Teacher, Admin)
 user: Union[Person, Student, Teacher, Admin]
 
+# Defining list of filter options for courses
 FILTER_OPTIONS: list[str] = ["", "All courses", "Courses for degree", "Courses I am taking"]
 
+# Initialising lists to hold filtered courses, all courses and courses for a degree
 courses_filter_list: list[Course] = []
 all_courses_list: list[Course] = []
 all_courses_for_degree_list: list[Course] = []
 
+# Variable to keep track of selected filter option
 select_filter_value: int = 0
 
+# Setting up main window for Tkinter GUI application
 window = tk.Tk()
 window.geometry("1000x500")
 
@@ -525,78 +529,109 @@ def login(frame, frames) -> None:
             user_message.config(text="Please enter required information")
 
 
+# Creating scrollbar and sidebar buttons for different sections of application
 def user_portal(frame, frames) -> None:
+    # Creating sidebar frame to hold navigation buttons
     sidebar = tk.Frame(frames["portal"], bg="#C9C9C9")
     sidebar.pack(ipadx=20, fill=tk.Y, side=tk.LEFT)
 
+    # Creating canvas widget within "portal" frame
     canvas = tk.Canvas(frames["portal"])
     canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
+    # Adding vertical scrollbar to "portal" frame and linking it to canvas
     scrollbar = tk.Scrollbar(frames["portal"], orient="vertical", command=canvas.yview)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
+    # Creating wrapper frame inside canvas
     wrapper_frame = tk.Frame(canvas)
     canvas.create_window((0, 0), window=wrapper_frame, anchor="n")
 
+    # Creating content frame inside wrapper frame to hold main content
     content_frame = tk.Frame(wrapper_frame)
     content_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
+    # Configuring canvas to update its scroll region whenever wrapper frame is resized
     wrapper_frame.bind("<Configure>", lambda event: canvas.configure(scrollregion=canvas.bbox("all")))
     canvas.configure(yscrollcommand=scrollbar.set)
 
+    # "Account" button to update content frame with account-related information
     account = tk.Button(sidebar, text="Account", bg="#C9C9C9", font=custom_font1,
                         command=lambda: update_content(content_frame, "account"))
     account.pack(pady=(15, 0))
 
+    # "Courses" button to update content frame with course-related information
     courses = tk.Button(sidebar, text="Courses", bg="#C9C9C9", font=custom_font1,
                         command=lambda: update_content(content_frame, "courses"))
     courses.pack(pady=(15, 0))
 
+    # "Grades" button to update content frame with grades-related information
     grades = tk.Button(sidebar, text="Grades", bg="#C9C9C9", font=custom_font1,
                        command=lambda: update_content(content_frame, "grades"))
     grades.pack(pady=(15, 0))
 
+    # "Sign Out" button to quit application
     sign_out = tk.Button(sidebar, text="Sign Out", bg="#C9C9C9", font=custom_font1, command=lambda: window.quit())
     sign_out.pack(pady=15, side=tk.BOTTOM)
 
+    # Initial call to update content frame with account-related information
     update_content(content_frame, "account")
 
 
 def update_content(content_frame: tk.Frame, context: str) -> None:
+    # Clearing all existing widgets from content frame
     for widget in content_frame.winfo_children():
         widget.destroy()
 
+    # Update content frame based on given context
     if context == "account":
+        # Load user account details into content frame
         user_account(content_frame)
 
     elif context == "courses":
+        # Load user courses information into content frame
         user_courses(content_frame)
 
     elif context == "grades":
+        # Load user grades information into content frame
         user_grades(content_frame)
 
 
+# Function to display user account in content frame
 def user_account(content_frame: tk.Frame) -> None:
+    # Creating frame to hold user account details in content frame
     frame00 = tk.Frame(content_frame)
     frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
+
+    # Displaying user account details in frame
     user_account_detail(frame00)
+
+    # Creating frames for account setting
     frame10 = tk.Frame(content_frame)
     frame10.pack(side=tk.TOP, fill=tk.X, anchor="n")
     frame20 = tk.Frame(content_frame)
     frame20.pack(side=tk.TOP, fill=tk.X, anchor="n")
+
+    # Displaying user account settings in frames
     user_account_setting(frame10, frame20, content_frame)
 
 
 def user_account_detail(frame00: tk.Frame) -> None:
+    # Creating frame for first column of user details
     frame01 = tk.Frame(frame00)
     frame01.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+
+    # Displaying user ID, name and birthdate
     tk.Label(frame01, text=f"ID: {user.id}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
     tk.Label(frame01, text=f"Name: {user.name} {user.surname}", font=custom_font2).pack(pady=(15, 0), padx=15,
                                                                                         anchor="nw")
     tk.Label(frame01, text=f"Birthdate: {user.birthdate}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
 
+    # Creating frame for second column of user details
     frame02 = tk.Frame(frame00)
     frame02.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
+
+    # Displaying user email, university email and degree
     tk.Label(frame02, text=f"Email: {user.email}", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
     tk.Label(frame02, text=f"University Email: {user.uniEmail}", font=custom_font2).pack(pady=(15, 0), padx=15,
                                                                                          anchor="nw")
@@ -604,14 +639,17 @@ def user_account_detail(frame00: tk.Frame) -> None:
 
 
 def user_account_setting(frame10: tk.Frame, frame20: tk.Frame, content_frame: tk.Frame) -> None:
+    # Displaying settings label
     tk.Label(frame10, text="Settings:", font=custom_font2).pack(pady=(15, 0), padx=15, anchor="nw")
 
+    # Creating frame for email settings
     frame21 = tk.Frame(frame20)
     frame21.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
     tk.Label(frame21, text="Email:", font=custom_font2).pack(padx=15, anchor="nw")
     email = ttk.Entry(frame21)
     email.pack(pady=(15, 0), padx=15, anchor="nw")
 
+    # Creating frame for password settings
     frame22 = tk.Frame(frame20)
     frame22.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
     tk.Label(frame22, text="Password:", font=custom_font2).pack(padx=15, anchor="nw")
@@ -620,14 +658,19 @@ def user_account_setting(frame10: tk.Frame, frame20: tk.Frame, content_frame: tk
     password2 = ttk.Entry(frame22)
     password2.pack(pady=(15, 0), padx=15, anchor="nw")
 
+    # Label to display messages related to settings
     setting_message = tk.Label(content_frame, text="")
     setting_message.pack()
+
+    # Save button to trigger saving of user settings
     tk.Button(content_frame, text="Save", bg="#C9C9C9", font=custom_font2,
               command=lambda: setting_message.config(text=save_user_settings(email.get(), password1.get(),
                                                                              password2.get()))).pack()
 
 
+# Function to display user courses in content frame
 def user_courses(content_frame: tk.Frame) -> None:
+    # Creating and packing frames for organising layout
     frame00 = tk.Frame(content_frame)
     frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
     frame01 = tk.Frame(frame00)
@@ -637,10 +680,12 @@ def user_courses(content_frame: tk.Frame) -> None:
     frame03 = tk.Frame(frame00)
     frame03.pack(pady=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
 
+    # Adding label and search entry field for search courses section
     tk.Label(frame01, text="Search Courses", font=custom_font2).pack(padx=15, anchor="nw")
     search = ttk.Entry(frame02, width=40)
     search.pack(padx=15, anchor="nw")
 
+    # Adding filter button and a combobox for filter options
     filter_b = tk.Button(frame03, text="Filter", font=custom_font2, command=lambda: handle_filter())
     filter_b.pack(side=tk.LEFT, padx=(0, 5))
 
@@ -649,6 +694,7 @@ def user_courses(content_frame: tk.Frame) -> None:
     filter_combobox.pack(padx=15, anchor="nw", side=tk.LEFT)
     filter_combobox.bind("<<ComboboxSelected>>", filter_courses)
 
+    # Function to handle filtering of courses based on search criteria and selected filter
     def handle_filter() -> None:
         global select_filter_value
         global courses_filter_list
@@ -664,6 +710,7 @@ def user_courses(content_frame: tk.Frame) -> None:
             courses_filter_list = search_list
         update_content(content_frame, "courses")
 
+    # Displaying filtered courses in content frame
     for course in courses_filter_list:
         frame10 = tk.Frame(content_frame)
         frame10.pack(side=tk.TOP, fill=tk.X, anchor="n")
@@ -674,48 +721,72 @@ def user_courses(content_frame: tk.Frame) -> None:
 
 
 def filter_courses(event) -> None:
+    # Global list to hold filtered courses
     global courses_filter_list
+    # Get selected filter option from event widget
     option = event.widget.get()
+    # Match selected filter option and update courses_filter_list accordingly
     match option:
         case "All courses":
+            # If "All courses" is selected, clear and copy all courses to filter list
             courses_filter_list.clear()
             courses_filter_list = copy.deepcopy(all_courses_list)
         case "Courses for degree":
+            # If "Courses for degree" is selected, clear and copy degree courses to filter list
             courses_filter_list.clear()
             courses_filter_list = copy.deepcopy(all_courses_for_degree_list)
         case "Courses I am taking":
+            # If "Courses I am taking" is selected, clear and copy user's courses to filter list
             courses_filter_list.clear()
             courses_filter_list = copy.deepcopy(user.courses)
         case _:
+            # For any other option, just clear filter list
             courses_filter_list.clear()
 
 
+# Function to display user grades in content frame
 def user_grades(content_frame: tk.Frame) -> None:
+    # Creating and packing main frame for user grades
     frame00 = tk.Frame(content_frame)
     frame00.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, anchor="nw")
+
+    # Creating and packing subframe within main frame
     frame01 = tk.Frame(frame00)
     frame01.pack(pady=(15, 15), side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
 
+    # Adding label to display "Current Courses"
     tk.Label(frame01, text="Current Courses", font=custom_font2).pack(padx=15, anchor="n")
+
+    # Loop through user's current courses to display each course and its grade
     for course in user.courses:
+        # Creating and packing frame for each course
         frame02 = tk.Frame(frame00, bg="#C9C9C9")
         frame02.pack(pady=(15, 0), padx=(15, 15), side=tk.TOP, fill=tk.X, expand=True, anchor="nw")
+
+        # Creating and packing subframes within course frame for course name and grade
         frame021 = tk.Frame(frame02, bg="#C9C9C9")
         frame021.pack(pady=(15, 15), padx=(15, 15), side=tk.LEFT, fill=tk.X, expand=True, anchor="nw")
         frame022 = tk.Frame(frame02, bg="#C9C9C9")
         frame022.pack(pady=(15, 15), padx=(15, 15), side=tk.RIGHT, fill=tk.X, expand=True, anchor="ne")
+
+        # Adding labels to display course name and grade
         tk.Label(frame021, text=course.name, font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="nw")
         tk.Label(frame022, text=grade_context(course), font=custom_font2, bg="#C9C9C9").pack(padx=15, anchor="ne")
 
 
+# Function to get grade context for a given course
 def grade_context(course: Course) -> str:
+    # Iterate through user's grades to find grade for specified course
     for grade in user.grades:
         if grade.course.name == course.name:
             return f"{grade.grades}/100"
+    # Return default value if no grade is found for course
     return f"-/100"
 
 
+# Function to save user settings (email and password)
 def save_user_settings(email_u: str, pass1: str, pass2: str) -> str:
+    # Validate email and password lengths and return appropriate messages
     if not validate_email(email_u) and (len(pass1) < 8 or len(pass2) < 8):
         return ""
     elif validate_email(email_u) and (len(pass1) > 7 and len(pass2) > 7) and (len(pass1) == len(pass2)):
