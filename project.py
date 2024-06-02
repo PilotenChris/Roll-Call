@@ -236,19 +236,32 @@ def get_all_courses_for_degree(user_id: int) -> None:
     with sqlite3.connect(DBFILE) as conn:
         cur = conn.cursor()
 
-        # Retrieve all the courses that the user is taking from the database
-        cur.execute("SELECT c.CourseId, c.CourseName, c.PassingGrade, c.Active FROM User AS u, Degree AS d, " +
-                    "Degrees AS deg, Connection AS con, Course AS c WHERE u.Id = d.UserId " +
-                    "AND d.DegreeBNId = deg.DegreeBNId AND deg.BaseId = con.BaseId " +
-                    "AND deg.DegreeBNId = con.DegreeBNId AND deg.TypeId = con.TypeId " +
-                    "AND con.CourseId = c.CourseId AND u.Id = ?", (user_id,))
-        all_courses_for_degree_from_database = cur.fetchall()
+        # Retrieve the full degree from user
+        cur.execute("SELECT BaseId, DegreeBNId, TypeId FROM Degree WHERE UserId = ?", (user_id,))
+        degree_for_user = cur.fetchone()
+
+        # Retrieve all the course ids for the specific degree the user is taking
+        if degree_for_user:
+            cur.execute("SELECT CourseId FROM Connection WHERE BaseId = ? AND DegreeBNId = ? AND TypeId = ?",
+                        (degree_for_user[0], degree_for_user[1], degree_for_user[2]))
+            all_courses_by_degree = cur.fetchall()
+
+        all_courses_for_degree: list = []
+
+        # Retrieve all the courses by the course ids from the user
+        if all_courses_by_degree:
+            for course_tuple in all_courses_by_degree:
+                # Retrieve all the courses that the user is taking from the database
+                cur.execute("SELECT CourseId, CourseName, PassingGrade, Active FROM Course WHERE CourseId = ?", (course_tuple[0],))
+                all_courses_for_degree_from_database = cur.fetchone()
+                all_courses_for_degree.append(all_courses_for_degree_from_database)
 
         global all_courses_for_degree_list
 
-        if all_courses_for_degree_from_database:
+        # Fill the all_courses_for_degree_list with all the courses from the user degree
+        if all_courses_for_degree:
             all_courses_for_degree_list.clear()
-            for course_tuple in all_courses_for_degree_from_database:
+            for course_tuple in all_courses_for_degree:
                 course_id = course_tuple[0]
                 course_name = course_tuple[1]
                 course_pass_grade = course_tuple[2]
