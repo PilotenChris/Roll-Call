@@ -1,7 +1,3 @@
-from Teacher import Teacher
-import Student
-
-
 class Course:
     def __init__(self, id: int, name: str, passing_grade: int, active_status: int):
         self.id: int = id
